@@ -1,53 +1,86 @@
-# User guide
+# Guide d’utilisation
 
-The interface is French. This guide describes its workflow in English.
+QA Workbench conserve les fiches de test, les résultats et le suivi des corrections.
+L’adresse de connexion vérifiée figure dans le [README](../README.md).
 
-## Start a short session
+## Préparer la première campagne
 
-Activate the individual link received from the installation administrator and set
-an individual password. Sign in, choose the project and open a campaign. The QA
-app's online address does not make localhost ERP addresses reachable from another
-computer. Each tester needs access to the campaign's specified ERP environment.
+L’administrateur active son accès avec le lien individuel fourni séparément, puis
+choisit son mot de passe. Aucun compte ChatGPT n’est nécessaire. Un lien expiré
+ou déjà utilisé doit être remplacé par le responsable de l’installation.
 
-Select a case assigned to you, or an unassigned case. Confirm prerequisites and
-synthetic account/data availability. Use separate browser contexts for different
-ERP identities. Never upload real student data or credentials.
+1. Choisir le projet **ERP multi-campus**. Les dix fiches initiales sont dans
+   **Fiches de test**. Le projet de validation technique contient uniquement des
+   exemples synthétiques ; il sert à vérifier le Workbench lui-même.
+2. Dans **Campagnes**, cliquer sur **Nouvelle campagne**. Indiquer un nom,
+   l’environnement et la version ou le commit de chaque brique ; écrire
+   « non concernée » pour une brique absente du périmètre.
+3. Sélectionner les fiches à tester et créer la campagne. Ses instructions sont
+   alors figées : modifier une fiche ne change pas les anciennes campagnes.
+4. Dans **Équipe**, cliquer sur **Inviter un testeur**, choisir son rôle et
+   préparer son accès. Transmettre le lien uniquement à la personne concernée.
+   Aucun e-mail n’est envoyé automatiquement. Un compte existant conserve son
+   mot de passe. Affecter ensuite les fiches aux testeurs si nécessaire.
 
-Read each action and compare the expected outcome with the actual behavior. Ten
-minutes is an estimate; it is neither a forced deadline nor proof of full coverage.
-Record notes and elapsed minutes. Save the draft before closing or switching devices;
-editing text alone does not save it. A saved draft is available on another device.
+Le Workbench en ligne ne rend pas l’ERP local accessible depuis un autre ordinateur.
+Chaque testeur doit pouvoir ouvrir l’environnement ERP indiqué dans la campagne.
+Utiliser des données synthétiques et fournir les identifiants séparément des fiches.
 
-## Record a result
+## Exécuter une fiche en une courte session
 
-- Réussi: the documented outcomes match.
-- Échoué: the product behaves differently from the expected outcomes.
-- Bloqué: an environment or prerequisite prevents execution.
-- Non exécuté: intentionally not run; explain why.
+Ouvrir une campagne, puis une fiche affectée à son compte ou non affectée.
+Vérifier les prérequis avant de commencer. Pour comparer plusieurs rôles ERP,
+utiliser des profils ou contextes de navigateur séparés.
 
-Upload PNG/JPEG/WebP evidence of up to 5 MiB per file. A pending or failed upload is
-not saved evidence. Retry confirmation after recovery, or cancel the pending entry.
-Do not finalize while evidence is pending. Finalized results cannot be rewritten.
-A later verification creates another result, preserving the failure.
+Suivre chaque action et comparer le résultat attendu au comportement observé.
+Les dix minutes sont une estimation, sans arrêt forcé ni garantie de couverture
+complète. Noter les étapes vérifiées, l’observation et le temps passé.
 
-## Report and follow up
+Cliquer sur **Enregistrer le brouillon** avant de fermer la fenêtre ou de changer
+d’appareil. Saisir du texte seul ne l’enregistre pas. Un brouillon enregistré peut
+être repris après rechargement ou sur un autre appareil.
 
-Open a finalized result and create a signalement. Choose product defect, suggestion,
-case error or environment problem. Include the failing step, observed behavior and
-reproduction details. Expected behavior and environment are retained in the campaign.
+Choisir le verdict, puis **Valider le résultat** :
 
-Editors/admins triage the issue and record a correction reference or decision.
-For a product defect, verification/closure requires a later successful execution of
-the same campaign item. A fixed status alone does not establish successful retesting.
-Case revisions affect future campaigns; existing instructions remain unchanged.
+- **Réussi** : les résultats attendus sont obtenus.
+- **Échoué** : le produit se comporte autrement que prévu.
+- **Bloqué** : un prérequis ou l’environnement empêche la vérification.
+- **Non exécuté** : le test n’a volontairement pas été réalisé ; expliquer pourquoi.
 
-## Team and recovery
+Joindre si utile des images PNG, JPEG ou WebP, de 5 Mo maximum chacune. Une capture
+« En attente » n’est pas une preuve enregistrée : confirmer l’envoi après reprise,
+ou annuler l’entrée avant de recommencer. Terminer ou annuler les envois en attente
+avant de finaliser. Ne jamais joindre de mot de passe, lien d’invitation ou donnée
+personnelle réelle. Les captures restent privées aux membres du projet.
 
-Project admins assign members and roles. Installation operators handle forgotten
-passwords through new individual links. No automatic email is sent. An existing
-account invited to another project keeps its password. Ask for a fresh link if an
-activation link expired or was already used.
+## Signaler un problème et vérifier la correction
 
-Administrators should export the project after meaningful campaigns and retain a
-private copy elsewhere. See [operations](OPERATIONS.md) for restoration. Report
-precise errors and refresh before retrying when another person modified a record.
+Depuis un résultat validé, créer un signalement. Choisir **Anomalie produit**,
+**Suggestion**, **Erreur de fiche** ou **Problème d’environnement**. Préciser l’étape,
+le comportement observé et les conditions de reproduction. Le contexte attendu
+reste disponible dans l’exécution et les instructions de la campagne.
+
+Le rédacteur ou l’administrateur ouvre **Signalements**, consulte l’exécution et
+ses captures, puis renseigne la correction, le commit ou la décision. Le statut
+« Corrigé » ne prouve pas que la correction fonctionne.
+
+Dans la campagne, cliquer sur **Revérifier** et enregistrer un nouveau résultat.
+L’échec précédent reste dans l’historique. Pour vérifier ou clôturer une anomalie
+produit, sélectionner dans son suivi une vérification réussie plus récente de la
+même fiche de campagne. Archiver une campagne conserve ses résultats.
+
+En cas de modification concurrente, actualiser et comparer les informations avant
+de recommencer. Une erreur réseau doit rester une erreur : vérifier l’état enregistré
+avant de répéter l’action.
+
+## Conserver le suivi et retrouver son accès
+
+Les administrateurs exportent le projet et les captures depuis **Équipe**, après
+une campagne importante. Conserver l’archive dans un emplacement privé distinct.
+La [procédure d’exploitation](OPERATIONS.md) décrit la restauration et la reprise
+après une pause de l’hébergement gratuit. Les sauvegardes ne sont pas automatiques.
+
+En cas de mot de passe oublié, demander un nouveau lien individuel au responsable
+de l’installation. Chaque personne choisit son mot de passe ; aucun mot de passe
+n’est affiché par l’application. Utiliser **Se déconnecter** en fin de session,
+y compris sur mobile.

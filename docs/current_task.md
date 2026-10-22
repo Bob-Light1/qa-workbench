@@ -1,66 +1,89 @@
 # Current task and handoff
 
 Last updated: 2026-10-22.
-Status: IMPLEMENTATION AND VERIFICATION IN PROGRESS. No hosted release verified.
+Status: PHASE 1 DELIVERED. Phases 2 and 3 have not started.
 
-## Objective and decisions
+## Objective and released state
 
-Deliver the approved standalone QA Workbench phase 1, ten French ERP cases,
-English engineering documentation, private source and free hosting. Preserve all
-ERP admission changes. See DESIGN.md for durable decisions and ROADMAP.md for status.
+The approved standalone QA Workbench is online at https://qa-workbench.pages.dev.
+Source repository: /home/adminsecu/Projects/qa-workbench, branch main, private local
+Git repository. Application release: 891d37a35b0c51b9c9fed5874d7c0d812638068a;
+Cloudflare production deployment f485304d. Final documentation/test evidence may
+have later commits without changing the deployed application. Supabase Free project
+xtgaepikylepriipuyps, region eu-west-3; migrations 1–4 and manage-access deployed.
 
-## Verified implementation state
+The ERP multi-campus project has ten French starter cases. Separate synthetic
+acceptance data verifies the Workbench itself; it does not establish ERP acceptance.
+The owner's account is provisioned. Its initial one-use link is in the ignored,
+private .env.admin-access.local file on this machine; never quote it in docs or logs.
+Use the server-only `qa access-link` operation to replace an expired link. Provider
+credentials/configuration remain in private ignored files. No paid upgrade, public
+source publication, remote Git hosting or phase-2 work was performed.
 
-Canonical repository: /home/adminsecu/Projects/qa-workbench, branch main.
-The current source is synchronized from /tmp/qa-workbench before release. Node 24
-is project-local; ERP runtimes and application code are unchanged.
+## Acceptance evidence actually executed
 
-Cloudflare direct-upload Pages project qa-workbench is authorized. Dedicated Free
-Supabase project QA Workbench: ref xtgaepikylepriipuyps, region eu-west-3.
-Migrations 1–4 and manage-access are deployed; Auth public signup is disabled and
-the email/password provider is enabled. Ten cases exist in ERP multi-campus and
-in a separate synthetic acceptance project. Owner account is provisioned privately;
-its activation link is never stored in documentation. Initial frontend deployment 1d8c11e5 is reachable over HTTPS. Hosted invitation
-activation passes. The first hosted login exposed a premature empty-project state
-while network requests were loading; a loading/retry fix and deterministic browser
-regression are being verified before a new publication. Full HTTPS acceptance is pending.
+- Eight unit checks PASS; TypeScript and production build PASS; npm audit reports
+  zero vulnerabilities. Vite's single JavaScript chunk is about 502 kB minified
+  (147 kB gzip); its advisory size warning remains, without a build failure.
+- Local integration: 47 checks PASS. Actual Auth/Postgres/API/Storage cover allow
+  and deny paths, project isolation, role restrictions, concurrent case edits,
+  frozen snapshots, draft reload, idempotent finalization, preserved failure/retest,
+  issue events, private captures, membership withdrawal and backup/restore.
+- Invitations: activation, expiry, replay refusal, recovery, denied account reset,
+  and weak-password rejection before link consumption are checked.
+- Local and hosted Chrome workflow/activation journeys PASS. They verify two
+  accounts, failed result/capture, referenced correction and successful retest,
+  mobile navigation/logout, stable textarea labels after reload, delayed network
+  responses after closing a dialog, and actual project-loading states.
+- Hosted UI archive download PASS, including ZIP integrity, case count and evidence.
+- Hosted API/Storage acceptance: all 11 checks PASS, including signup refusal,
+  email login, cross-project isolation, direct/RPC write denial and private images.
+- Hosted HTTPS returns 200 with CSP, no-referrer and framing-denial headers.
+  The configured server key, database password and owner email are absent from
+  published assets. Desktop/mobile views were visually inspected using synthetic
+  identities. Invitation screens are excluded from automatic screenshots.
+- A hosted export was restored into an empty owned local installation. Verified:
+  1 project, 5 memberships/profiles, 10 cases/revisions, 1 campaign/10 items,
+  2 executions, 1 issue/2 events, 1 attachment. Counts, evidence bytes and historical
+  relationships passed; the restored admin regained access through a new invitation.
+  The previous synthetic local history was exported before its reset.
 
-## Checks actually run
+Private acceptance backups are in backups/: integration.zip,
+local-before-hosted-restore.zip, hosted-acceptance.zip and hosted-restore-evidence.json.
+They are local copies; operations requires a separate private off-machine copy.
+The hosted technical project retains the failure and successful verification.
+CI configuration exists but no remote CI run is claimed.
 
-- Eight unit checks PASS; TypeScript and production build PASS.
-- npm dependency audit: zero vulnerabilities.
-- Local integration: 47 checks PASS, covering RLS/API/Storage allow/deny,
-  concurrent edits, frozen instructions, drafts/idempotent submissions, issue
-  history, invitations/recovery/expiry/replay, withdrawal and export/restore.
-- Empty-installation restore PASS with row counts, historical attribution and
-  downloaded evidence bytes checked. Missing Auth identities are reprovisioned.
-- Both Chrome journeys PASS: two accounts, failure/capture/fix/retest, draft reload,
-  delayed save response after closing the dialog, mobile navigation/logout; and
-  weak-password activation plus one-use invitation replay refusal.
-- Desktop and 390px mobile screenshots inspected. The inspection found and fixed
-  clipped navigation and hidden mobile logout. Explicit screenshots contain only
-  synthetic QA identities. Screenshots during invitation display are disabled.
+## Corrections incorporated before release
 
-## Local infrastructure caution
+Strict case-body validation at the database boundary; editable technical references;
+issue-to-execution/capture navigation; correctly bounded random reprovisioning passwords;
+email provider enabled with global public signup disabled; explicit field labels;
+closed dialogs stay closed after delayed saves; mobile logout and all navigation
+remain visible; loading/retry does not falsely claim that no project is assigned.
 
-The old volume supabase_db_qa-workbench is preserved. Automatic approval rejected
-its deletion because absence of useful data was unverified. The separate
-qa-workbench-validation database uses a disposable 768 MiB tmpfs volume on this
-machine; never store durable results there. Required health checks remain active.
-See OPERATIONS.md for startup, migrations and discarded-RAM-data behavior.
+## Continuity and local infrastructure
 
-## Changes this session
+All four ERP repositories link to this project in AGENTS.md and docs/context.md.
+The ERP roadmap/QA strategy reference the external support without changing product
+phase order or completing CH-* work. Unrelated admission changes are preserved.
+The ERP application, consumers, fixtures and Node runtimes were not changed.
 
-Case technical-reference editing; direct issue-to-execution/evidence navigation;
-restore-generated passwords meet the configured strength requirement; validation
-stack guard before integration resets; additive case-body validation migration.
-Existing documentation links in all four ERP repositories remain present. No ERP
-business code or fixtures changed; admission work remains untouched.
+The old volume supabase_db_qa-workbench is preserved after an interrupted startup.
+Automatic approval rejected deleting it because useful-data absence was unverified;
+a safe separate validation volume was used. The owned qa-workbench-validation DB
+uses 768 MiB tmpfs on this machine. It is disposable and currently contains the
+restored hosted acceptance archive. Stopping it can discard its data. Read
+OPERATIONS.md before restart/reset. Never use integration resets against hosted data.
 
-## Remaining work and next action
+The editing staging directory /tmp/qa-workbench is ephemeral. Persistent repository
+source and private release files must be synchronized before leaving this session.
+The final source, docs, test evidence and backups are retained in the project path.
 
-Commit the loading-state correction, republish the configured frontend, run both browser
-journeys over HTTPS and hosted API denial checks, export hosted data and verify
-recovery evidence. Record deployment/commit identifiers, finalize roadmap/docs,
-refresh and deliver the private owner activation file, check all ERP references.
-Do not mark phase 1 delivered until hosted acceptance passes.
+## Next action
+
+The owner activates the private link, chooses ERP multi-campus and creates the first
+real campaign using the French USER_GUIDE.md. No further product work is implicitly
+authorized by this handoff. For the next requested ERP roadmap task, identify case
+IDs to create/revise/archive, or document why manual QA is unaffected. Follow the
+project roadmap for future phase-2 prioritization and operations for manual backups.

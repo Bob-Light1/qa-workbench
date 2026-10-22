@@ -7,7 +7,10 @@ user cap is implemented.
 
 ## Delivery status
 
-Phase 1 implementation and verification are in progress. **No hosted URL is verified yet.**
+The phase-1 application is available at **https://qa-workbench.pages.dev**.
+HTTPS two-account workflows, invitations, private evidence and hosted API access
+checks have passed. Portable restoration has been exercised against an empty local
+installation. Initial source release: `891d37a`; production deployment: `f485304d`.
 The authoritative work status is [the roadmap](docs/ROADMAP.md); the latest executed
 checks and next action are in [the handoff](docs/current_task.md).
 
@@ -20,6 +23,7 @@ Node 24 runtime when present (for example `bash scripts/npm run dev`).
 ```sh
 npm ci
 npm run db:start
+npx supabase migration up --local
 node scripts/local-env.mjs
 npx supabase functions serve --env-file .env.functions.local
 # In another terminal:
@@ -27,7 +31,9 @@ npm run dev
 ```
 
 The app uses http://localhost:5178. The owned Supabase API uses 55321, database 55322
-and Studio 55323. Never point local reset or integration tests at another database.
+and optional Studio 55323. On the initial machine the validation database is
+disposable RAM storage: see [operations](docs/OPERATIONS.md) before using it.
+Never point local reset or integration tests at another database.
 The generated environment files contain local credentials and are ignored by Git.
 Bootstrap the first account through the server-only CLI; see [operations](docs/OPERATIONS.md).
 
@@ -40,6 +46,10 @@ Bootstrap the first account through the server-only CLI; see [operations](docs/O
 - [Contributing](docs/CONTRIBUTING.md): development, API and validation.
 - [Operations](docs/OPERATIONS.md): deploy, provision, recover and restore.
 - [User guide](docs/USER_GUIDE.md): testing and reporting.
+
+For first use, activate the private individual link provided separately, choose
+**ERP multi-campus**, and follow the French [user guide](docs/USER_GUIDE.md).
+The technical-acceptance project is reserved for synthetic Workbench checks.
 
 The application tracks the ERP but does not run it or deploy it. The first ten cases
 use local synthetic ERP data. Product coverage is intentionally incremental.

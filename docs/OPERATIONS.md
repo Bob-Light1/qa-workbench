@@ -132,3 +132,33 @@ node scripts/local-env.mjs
 
 All required API/Auth/Storage/function health checks remain enabled. Integration
 resets are restricted to this named validation stack and its loopback API.
+
+## Initial deployment inventory
+
+- Canonical HTTPS origin: https://qa-workbench.pages.dev
+- Cloudflare Pages direct-upload project: `qa-workbench`; production branch `main`.
+- Verified application code: `891d37a35b0c51b9c9fed5874d7c0d812638068a`.
+- Production deployment: `f485304d` (https://f485304d.qa-workbench.pages.dev).
+- Supabase Free project: `xtgaepikylepriipuyps`, region `eu-west-3`,
+  [provider dashboard](https://supabase.com/dashboard/project/xtgaepikylepriipuyps).
+- Migrations: `202610220001` through `202610220004`; Edge Function: `manage-access`.
+- Private host environment on the initial machine: `.env.hosted.local` (server),
+  `.env.production.local` (frontend publishable configuration). Never display their
+  contents in logs. `.env.admin-access.local` is a temporary one-use access link,
+  not a configuration file to load. Regenerate through `qa access-link` when needed.
+- The ERP multi-campus workspace contains the ten French starter cases. A separate
+  technical-acceptance project contains synthetic accounts and test results.
+  Keep user campaigns in the ERP workspace. Do not present synthetic acceptance
+  results as evidence that the ERP cases themselves have been manually executed.
+
+For frontend rollback, use the Cloudflare Pages dashboard to select a previous
+production deployment and roll it back; see [provider procedure](https://developers.cloudflare.com/pages/configuration/rollbacks/).
+Preserve schema compatibility and keep a current export before any migration.
+The initial `1d8c11e5` deployment predates the project-loading repair; prefer a
+verified release when another is available. Applied migrations remain append-only.
+
+Backups produced during acceptance live in the ignored `backups/` directory and
+are private local copies. Copy a verified archive to a separate private location;
+local files alone do not protect against loss of this machine. A source Git bundle
+can also preserve the private repository without publishing it. No remote Git
+repository or scheduled backup has been configured in phase 1.
