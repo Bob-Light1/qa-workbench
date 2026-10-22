@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.tools/
+.env*
+backups/
+supabase/.temp/
+test-results/
+package-lock.json

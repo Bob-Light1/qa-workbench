@@ -1,0 +1,272 @@
+[
+  {
+    "code": "ERP-001",
+    "body": {
+      "title": "Connexion administrateur",
+      "objective": "Accéder à l’espace administrateur avec un compte valide.",
+      "prerequisites": "ERP local démarré. Compte administrateur synthétique actif, fourni séparément. Ouvrir un contexte navigateur distinct de celui des autres rôles.",
+      "steps": [
+        {
+          "action": "Ouvrir http://localhost:5173/admin/login.",
+          "expected": "Le formulaire administrateur apparaît sans erreur technique."
+        },
+        {
+          "action": "Saisir les identifiants fournis et valider.",
+          "expected": "La connexion aboutit au tableau de bord administrateur ; aucune donnée secrète ne figure dans l’URL."
+        },
+        {
+          "action": "Recharger la page.",
+          "expected": "La session reste utilisable et le tableau de bord se recharge."
+        }
+      ],
+      "minutes": 10,
+      "domain": "Authentification",
+      "bricks": ["B1", "B2"],
+      "roadmap": "Phase 1-B, ligne 3",
+      "source": "frontend/src/routes/AdminRoutes.jsx; backend/tests/fixtures/admin-portal.visual.js"
+    }
+  },
+  {
+    "code": "ERP-002",
+    "body": {
+      "title": "Connexion du gestionnaire de campus",
+      "objective": "Accéder au bon espace de campus.",
+      "prerequisites": "Compte gestionnaire synthétique du campus A, avec son nom de campus connu. ERP local démarré.",
+      "steps": [
+        {
+          "action": "Ouvrir http://localhost:5173/login et choisir le rôle gestionnaire.",
+          "expected": "Le formulaire correspondant au gestionnaire est affiché."
+        },
+        {
+          "action": "Se connecter avec le compte du campus A.",
+          "expected": "Le tableau de bord du campus A apparaît."
+        },
+        {
+          "action": "Ouvrir la liste des étudiants.",
+          "expected": "La liste se charge et indique le périmètre attendu ; aucun écran administrateur global n’est requis."
+        }
+      ],
+      "minutes": 10,
+      "domain": "Authentification",
+      "bricks": ["B1", "B2"],
+      "roadmap": "Phase 1-B, ligne 3",
+      "source": "frontend/src/routes/CampusRoutes.jsx; backend/tests/fixtures/admin-portal.visual.js"
+    }
+  },
+  {
+    "code": "ERP-003",
+    "body": {
+      "title": "Refus d’un mot de passe incorrect",
+      "objective": "Vérifier le refus d’une tentative invalide sans divulguer de données.",
+      "prerequisites": "Compte synthétique actif connu. Effectuer une seule tentative erronée pour ne pas déclencher le verrouillage prévu.",
+      "steps": [
+        {
+          "action": "Ouvrir une session navigateur vierge sur le formulaire de connexion.",
+          "expected": "Aucune session déjà ouverte ne masque le test."
+        },
+        {
+          "action": "Saisir un identifiant fourni et un mot de passe volontairement incorrect ; valider une fois.",
+          "expected": "Une erreur de connexion est affichée ; aucun espace protégé n’est ouvert."
+        },
+        {
+          "action": "Remplacer par le mot de passe correct et valider.",
+          "expected": "Le compte actif peut se connecter après cette tentative unique."
+        }
+      ],
+      "minutes": 10,
+      "domain": "Authentification",
+      "bricks": ["B1", "B2"],
+      "roadmap": "Phase 1-B, ligne 3",
+      "source": "backend/tests/fixtures/auth-session.journey.js"
+    }
+  },
+  {
+    "code": "ERP-004",
+    "body": {
+      "title": "Déconnexion et retour sur une page protégée",
+      "objective": "Vérifier la fin de session côté utilisateur.",
+      "prerequisites": "Compte synthétique connecté ; noter l’adresse du tableau de bord avant la déconnexion.",
+      "steps": [
+        {
+          "action": "Utiliser la commande de déconnexion de l’espace connecté.",
+          "expected": "L’interface revient vers une page de connexion ou une page publique."
+        },
+        {
+          "action": "Rouvrir l’adresse protégée notée puis recharger.",
+          "expected": "Une nouvelle authentification est demandée ; les données protégées ne sont pas rechargées."
+        },
+        {
+          "action": "Se reconnecter avec le même compte.",
+          "expected": "Une nouvelle session permet d’ouvrir l’espace autorisé."
+        }
+      ],
+      "minutes": 10,
+      "domain": "Authentification",
+      "bricks": ["B1", "B2"],
+      "roadmap": "Phase 1-B, ligne 3",
+      "source": "backend/tests/fixtures/auth-session.visual.js"
+    }
+  },
+  {
+    "code": "ERP-005",
+    "body": {
+      "title": "Périmètre des étudiants par campus",
+      "objective": "Contrôler la visibilité du gestionnaire entre deux campus.",
+      "prerequisites": "Deux campus synthétiques A et B. Comptes gestionnaires séparés. Noms ou identifiants de deux étudiants vivants connus, un par campus. Utiliser deux contextes navigateur.",
+      "steps": [
+        {
+          "action": "Avec le gestionnaire A, ouvrir la liste des étudiants et rechercher l’étudiant A connu.",
+          "expected": "L’étudiant du campus A est visible."
+        },
+        {
+          "action": "Rechercher l’étudiant B connu avec le même compte.",
+          "expected": "Aucune fiche du campus B ne doit être retournée."
+        },
+        {
+          "action": "Avec le gestionnaire B, retrouver l’étudiant B puis rechercher l’étudiant A.",
+          "expected": "Le résultat symétrique respecte le campus B. Un résultat vide seul ne suffit pas : l’étudiant B doit d’abord avoir été retrouvé."
+        }
+      ],
+      "minutes": 10,
+      "domain": "Isolation campus",
+      "bricks": ["B1", "B2"],
+      "roadmap": "Socle multi-campus ; QA CH-2 complément manuel",
+      "source": "backend/CLAUDE.md §2; backend/tests/fixtures/admin-portal.visual.js"
+    }
+  },
+  {
+    "code": "ERP-006",
+    "body": {
+      "title": "Téléchargement du reçu de paiement",
+      "objective": "Vérifier le reçu réellement obtenu par l’étudiant.",
+      "prerequisites": "Compte étudiant synthétique avec un paiement existant. Référence et montant attendus fournis dans le jeu de données. Module finance actif ; navigateur autorisant les téléchargements.",
+      "steps": [
+        {
+          "action": "Se connecter comme étudiant puis ouvrir Finance.",
+          "expected": "Le paiement connu figure dans l’historique."
+        },
+        {
+          "action": "Utiliser la commande de téléchargement du reçu de ce paiement.",
+          "expected": "Un fichier PDF est téléchargé et peut être ouvert."
+        },
+        {
+          "action": "Comparer le nom de l’étudiant, le montant et la référence du document aux données attendues.",
+          "expected": "Les trois correspondent au paiement. Le nom du fichier conserve une référence de reçu et le document ne présente pas de texte tronqué."
+        }
+      ],
+      "minutes": 10,
+      "domain": "Finance",
+      "bricks": ["B1", "B2"],
+      "roadmap": "Phase 1-B, ligne 6",
+      "source": "backend/docs/architecture/features/fee-receipts-and-reminders.md; frontend/src/routes/StudentRoutes.jsx"
+    }
+  },
+  {
+    "code": "ERP-007",
+    "body": {
+      "title": "Finance en lecture seule",
+      "objective": "Vérifier la lecture conservée et les écritures refusées.",
+      "prerequisites": "Campus synthétique avec finance configurée en read_only par l’administrateur. Étudiant avec paiement et compte gestionnaire. Réserver ce campus à ce scénario ; restaurer son état après le test.",
+      "steps": [
+        {
+          "action": "Avec le gestionnaire du campus réservé, ouvrir Finance.",
+          "expected": "Un état de lecture seule est visible et l’historique reste consultable."
+        },
+        {
+          "action": "Essayer d’ouvrir ou valider la création d’une dépense synthétique.",
+          "expected": "L’écriture est indisponible ou explicitement refusée ; aucune dépense nouvelle n’apparaît après rechargement."
+        },
+        {
+          "action": "Avec l’étudiant du même campus, télécharger le reçu existant.",
+          "expected": "Le reçu reste téléchargeable malgré la lecture seule."
+        }
+      ],
+      "minutes": 10,
+      "domain": "Disponibilité des modules",
+      "bricks": ["B1", "B2"],
+      "roadmap": "Phase 1-B, ligne 2 et ligne 6",
+      "source": "backend/tests/fixtures/visual.js, Act 2"
+    }
+  },
+  {
+    "code": "ERP-008",
+    "body": {
+      "title": "Consultation des programmes publics",
+      "objective": "Vérifier un programme disponible sur le portail public.",
+      "prerequisites": "Portail local sur http://localhost:3000, relié au backend de test. Campus synthétique actif avec un programme publié connu. Aucun compte requis.",
+      "steps": [
+        {
+          "action": "Ouvrir le portail et accéder au catalogue des programmes du campus de test.",
+          "expected": "Le programme publié connu est présent et le chargement se termine sans erreur."
+        },
+        {
+          "action": "Ouvrir sa fiche.",
+          "expected": "Le titre et les informations du programme correspondent au jeu de données."
+        },
+        {
+          "action": "Suivre l’action de préinscription.",
+          "expected": "Le formulaire du bon campus est proposé ; aucun parcours de création effective d’étudiant non livré n’est supposé."
+        }
+      ],
+      "minutes": 10,
+      "domain": "Recrutement",
+      "bricks": ["B1", "B4"],
+      "roadmap": "Phase 1-B, ligne 13",
+      "source": "partner/src/app; backend/tests/integration/portal-browser.js"
+    }
+  },
+  {
+    "code": "ERP-009",
+    "body": {
+      "title": "Validation du formulaire de préinscription",
+      "objective": "Vérifier les erreurs de saisie avant l’envoi d’un dossier.",
+      "prerequisites": "Portail et backend locaux avec données synthétiques ; campus et programme disponibles. Fournir une adresse synthétique et ne jamais utiliser un dossier réel.",
+      "steps": [
+        {
+          "action": "Ouvrir le formulaire de préinscription du programme de test et tenter de continuer avec les champs obligatoires vides.",
+          "expected": "Les champs requis sont signalés ; aucune confirmation d’inscription n’est affichée."
+        },
+        {
+          "action": "Renseigner une adresse e-mail manifestement invalide.",
+          "expected": "Une erreur de format empêche la validation du formulaire."
+        },
+        {
+          "action": "Corriger les champs avec les données synthétiques puis relire le récapitulatif sans soumettre.",
+          "expected": "Le formulaire accepte les formats corrigés ; les choix de campus et de programme restent cohérents. La création effective d’un étudiant n’est pas un résultat attendu de cette fiche."
+        }
+      ],
+      "minutes": 10,
+      "domain": "Recrutement",
+      "bricks": ["B1", "B4"],
+      "roadmap": "Phase 1-B, ligne 13 ; ligne 5 existant uniquement",
+      "source": "partner/src/app; partner/docs/api-contract.md; backend/tests/integration/portal-browser.js"
+    }
+  },
+  {
+    "code": "ERP-010",
+    "body": {
+      "title": "Affichage lorsque le service IA est indisponible",
+      "objective": "Vérifier une dégradation compréhensible sans perdre la session ERP.",
+      "prerequisites": "Environnement local réservé, compte autorisé au module IA et module activé. Le responsable configure le backend local avec service IA indisponible, sans toucher aux services partagés. Ce scénario ne mesure pas la qualité des réponses IA.",
+      "steps": [
+        {
+          "action": "Se connecter puis ouvrir l’espace IA.",
+          "expected": "L’espace affiche un état d’indisponibilité compréhensible, sans écran blanc ni chargement sans fin."
+        },
+        {
+          "action": "Tenter une action de génération si elle reste proposée.",
+          "expected": "Une indisponibilité explicite est affichée ; aucune réponse inventée n’est présentée comme résultat du service."
+        },
+        {
+          "action": "Revenir à un écran ERP hors IA puis recharger.",
+          "expected": "La session reste utilisable ; les autres écrans fonctionnent. Le responsable restaure ensuite la configuration locale."
+        }
+      ],
+      "minutes": 10,
+      "domain": "Assistance IA",
+      "bricks": ["B1", "B2", "B3"],
+      "roadmap": "Phase 1-B, ligne 4 — disponibilité locale",
+      "source": "backend/tests/fixtures/ai.visual.js; backend/docs/architecture/features/ai-operational-acceptance.md"
+    }
+  }
+]

@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.env*
+!.env.example
+supabase/.temp/
+supabase/.branches/
+test-results/
+playwright-report/
+backups/
+*.log
+*.tsbuildinfo
+.env.browser
+.wrangler/
+.tools/
