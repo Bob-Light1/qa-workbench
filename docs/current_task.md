@@ -20,8 +20,10 @@ Supabase project QA Workbench: ref xtgaepikylepriipuyps, region eu-west-3.
 Migrations 1–4 and manage-access are deployed; Auth public signup is disabled and
 the email/password provider is enabled. Ten cases exist in ERP multi-campus and
 in a separate synthetic acceptance project. Owner account is provisioned privately;
-its activation link is never stored in documentation. Frontend deployment and
-HTTPS acceptance are next; no online release is claimed yet.
+its activation link is never stored in documentation. Initial frontend deployment 1d8c11e5 is reachable over HTTPS. Hosted invitation
+activation passes. The first hosted login exposed a premature empty-project state
+while network requests were loading; a loading/retry fix and deterministic browser
+regression are being verified before a new publication. Full HTTPS acceptance is pending.
 
 ## Checks actually run
 
@@ -57,7 +59,7 @@ business code or fixtures changed; admission work remains untouched.
 
 ## Remaining work and next action
 
-Commit the reviewed source, publish the configured frontend, run both browser
+Commit the loading-state correction, republish the configured frontend, run both browser
 journeys over HTTPS and hosted API denial checks, export hosted data and verify
 recovery evidence. Record deployment/commit identifiers, finalize roadmap/docs,
 refresh and deliver the private owner activation file, check all ERP references.

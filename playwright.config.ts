@@ -8,6 +8,7 @@ const executablePath =
 export default defineConfig({
   testDir: "tests/browser",
   timeout: 120000,
+  expect: { timeout: 20000 },
   workers: 1,
   use: {
     actionTimeout: 20000,

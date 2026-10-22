@@ -13,6 +13,24 @@ test("two accounts preserve failure, evidence and a later successful verificatio
   const owner = await ownerContext.newPage(),
     tester = await testerContext.newPage();
   const login = async (page: typeof owner, email: string) => {
+    let releaseProjects!: () => void;
+    let fetchedProjects!: () => void;
+    const projectsGate = new Promise<void>((resolve) => {
+      releaseProjects = resolve;
+    });
+    const fetched = new Promise<void>((resolve) => {
+      fetchedProjects = resolve;
+    });
+    await page.route(
+      /\/rest\/v1\/projects\?/,
+      async (route) => {
+        const response = await route.fetch();
+        fetchedProjects();
+        await projectsGate;
+        await route.fulfill({ response });
+      },
+      { times: 1 },
+    );
     await page.goto("/");
     await page.getByLabel("Adresse e-mail", { exact: true }).fill(email);
     await page
@@ -21,6 +39,16 @@ test("two accounts preserve failure, evidence and a later successful verificatio
     await page
       .getByRole("button", { name: "Se connecter", exact: true })
       .click();
+    await fetched;
+    await expect(
+      page.getByText("Chargement des projets…", { exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", {
+        name: "Votre espace est prêt à être configuré",
+      }),
+    ).toHaveCount(0);
+    releaseProjects();
     await expect(
       page.getByRole("heading", { name: /La qualité se construit/ }),
     ).toBeVisible();

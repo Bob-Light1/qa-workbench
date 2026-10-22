@@ -319,6 +319,7 @@ export function App() {
   const [session, setSession] = useState<Session | null>(null),
     [authReady, setAuthReady] = useState(false),
     [projects, setProjects] = useState<Project[]>([]),
+    [projectsLoading, setProjectsLoading] = useState(true),
     [project, setProject] = useState(""),
     [data, setData] = useState<Data>(empty),
     [tab, setTab] = useState("dashboard"),
@@ -415,6 +416,7 @@ export function App() {
   }, []);
   useEffect(() => {
     if (!session) return;
+    setProjectsLoading(true);
     let alive = true;
     rows<Project>("projects")
       .then((list) => {
@@ -425,7 +427,12 @@ export function App() {
           );
         }
       })
-      .catch((e) => setError(friendlyError(e)));
+      .catch((e) => {
+        if (alive) setError(friendlyError(e));
+      })
+      .finally(() => {
+        if (alive) setProjectsLoading(false);
+      });
     return () => {
       alive = false;
     };
@@ -438,7 +445,21 @@ export function App() {
     setCaseEditor(null);
     if (project) reload(project).catch((e) => setError(friendlyError(e)));
   }, [project]);
-  const refresh = () => run(() => reload());
+  const refresh = () =>
+    run(async () => {
+      setProjectsLoading(true);
+      try {
+        const list = await rows<Project>("projects");
+        setProjects(list);
+        const next = list.some((p) => p.id === project)
+          ? project
+          : list[0]?.id || "";
+        setProject(next);
+        if (next && next === project) await reload(next);
+      } finally {
+        setProjectsLoading(false);
+      }
+    });
   const latest = (id: string) =>
     data.executions
       .filter((e) => e.item_id === id && e.verdict)
@@ -604,7 +625,7 @@ export function App() {
           </span>
           <button
             className="text-button"
-            disabled={busy || loading}
+            disabled={busy || loading || projectsLoading}
             onClick={refresh}
           >
             <RefreshCw size={14} />
@@ -635,7 +656,15 @@ export function App() {
               Actualisation des données…
             </div>
           )}
-          {!project ? (
+          {projectsLoading ? (
+            <div role="status" className="loading">
+              Chargement des projets…
+            </div>
+          ) : !project && error ? (
+            <div className="empty">
+              Impossible de charger les projets. Réessayez avec « Actualiser ».
+            </div>
+          ) : !project ? (
             <div className="empty">
               <h2>Votre espace est prêt à être configuré</h2>
               <p>Votre administrateur doit vous affecter à un projet.</p>
