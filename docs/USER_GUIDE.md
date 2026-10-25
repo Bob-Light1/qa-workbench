@@ -109,3 +109,22 @@ En cas de mot de passe oublié, demander un nouveau lien individuel au responsab
 de l’installation. Chaque personne choisit son mot de passe ; aucun mot de passe
 n’est affiché par l’application. Utiliser **Se déconnecter** en fin de session,
 y compris sur mobile.
+
+## Relire une fiche
+
+Dans **Fiches de test**, la colonne **Revue** indique **À relire**, **Approuvée**
+ou **À corriger**. Un rédacteur ou administrateur peut choisir **Relire**, vérifier
+les instructions, puis enregistrer son avis. Un commentaire est obligatoire pour
+une demande de correction. Les testeurs consultent ces avis avec **Voir les revues**.
+L’historique conserve l’auteur, la date et la version de chaque avis.
+
+Après modification, archivage ou restauration, une ancienne revue apparaît comme
+**À relire après modification**. Relisez la nouvelle version avant de l’approuver.
+Si une autre personne a modifié la fiche ou enregistré un avis entre-temps, fermez
+la fenêtre, actualisez la page et relisez avant de réessayer. Un échec d’enregistrement
+ne valide aucun avis.
+
+Une revue porte sur la qualité de la fiche. Elle ne constitue pas un résultat de
+test ni une validation de l’ERP ; elle n’empêche pas la création d’une campagne.
+Les exports incluent l’historique des revues. Les anciennes archives restent
+restaurables, sans revue si elles précèdent cette fonctionnalité.

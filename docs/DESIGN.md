@@ -25,6 +25,14 @@ without generating a takeover link.
   project admin cannot be removed or demoted, even by concurrent requests.
 - Test cases have stable project-scoped codes and an optimistic version. Every
   revision stores author, time and body. Archive/restore preserves revision history.
+- Case reviews are append-only opinions (approved/changes requested) by current
+  admins/editors, bound to an exact case revision. Requested changes require a
+  comment containing more than whitespace; testers can read history. The last review number orders opinions, and
+  writes compare both the case revision and the previous review identity under a
+  case-row lock. Editing, archiving or restoring a case makes older opinions stale.
+  Review is advisory: it neither blocks campaigns nor establishes ERP acceptance.
+  The stricter RPC does not rewrite earlier opinions on restore.
+  Author self-review is permitted; no independent-approver workflow is claimed.
 - Campaigns record the environment and per-brick build references. Their items
   store immutable case snapshots at campaign creation, not at first execution.
 - Assignments are versioned. An unassigned item is open to project members; an
@@ -65,7 +73,7 @@ No automatic email, public signup, billing, marketing page or ERP provisioning i
 
 ## Backup and portability
 
-Version-1 ZIP bundles contain one project, memberships/profiles, case revisions,
+Version-2 ZIP bundles contain one project, memberships/profiles, case revisions/reviews,
 campaigns/snapshots, executions, issues/events and evidence bytes. A single RPC
 captures a consistent database snapshot. SHA-256 checks detect corruption of the
 manifest and files; checksums are not signatures of trust.
@@ -75,7 +83,10 @@ recreates missing Auth identities with unknown random passwords, maps historical
 actors to the equivalent target accounts, uploads evidence and inserts business
 rows transactionally. Counts and downloaded files are checked afterwards. Existing
 accounts keep their passwords; recreated users require new invitation/recovery links.
-Auth password hashes and sessions are not part of the portable business bundle.
+Version-1 archives remain readable/restorable with no review history; version 2
+requires the review table so older clients reject new archives instead of silently
+dropping reviews. Historical review authors use the same identity mapping as other
+authors. Auth password hashes and sessions are not part of the portable business bundle.
 This is a documented account-reprovisioning recovery path, not a raw infrastructure clone.
 
 ## Three development phases

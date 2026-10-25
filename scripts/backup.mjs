@@ -16,7 +16,7 @@ export async function backup(db, project, filename) {
   const bytes = await encodeBackup(
     {
       format: "qa-workbench",
-      version: 1,
+      version: 2,
       project_id: project,
       exported_at: new Date().toISOString(),
       tables,

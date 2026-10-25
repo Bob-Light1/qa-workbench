@@ -1,7 +1,7 @@
 import { zipSync, unzipSync, strToU8, strFromU8 } from "fflate";
 export type Bundle = {
   format: "qa-workbench";
-  version: 1;
+  version: 1 | 2;
   project_id: string;
   exported_at: string;
   tables: Record<string, Record<string, unknown>[]>;
@@ -13,6 +13,7 @@ export const tableNames = [
   "profiles",
   "test_cases",
   "case_versions",
+  "case_reviews",
   "campaigns",
   "campaign_items",
   "executions",
@@ -52,13 +53,20 @@ export async function decodeBackup(bytes: Uint8Array) {
   const bundle = JSON.parse(strFromU8(document)) as Bundle;
   if (
     bundle.format !== "qa-workbench" ||
-    bundle.version !== 1 ||
+    ![1, 2].includes(bundle.version) ||
     !bundle.tables ||
-    tableNames.some((t) => !Array.isArray(bundle.tables[t])) ||
+    tableNames.some((t) =>
+      t === "case_reviews" &&
+      bundle.version === 1 &&
+      bundle.tables[t] === undefined
+        ? false
+        : !Array.isArray(bundle.tables[t]),
+    ) ||
     bundle.tables.projects.length !== 1 ||
     bundle.tables.projects[0].id !== bundle.project_id
   )
     throw new Error("INVALID_BACKUP");
+  bundle.tables.case_reviews ??= [];
   const expected = new Set(["manifest.json", "manifest.sha256"]);
   for (const a of bundle.tables.attachments) {
     const name = `files/${a.id}`;

@@ -76,8 +76,24 @@ describe("Portable backup", () => {
       "files/capture-a": new Uint8Array([1, 2, 3]),
     });
     const read = await decodeBackup(bytes);
-    expect(read.bundle.tables).toEqual(tables);
+    expect(read.bundle.tables).toEqual({ ...tables, case_reviews: [] });
     expect([...read.files["files/capture-a"]]).toEqual([1, 2, 3]);
+  });
+  it("preserves review history in v2 and requires its table", async () => {
+    const reviews = [{ id: "review-a", case_version: 2, author_id: "actor-a" }];
+    const v2 = {
+      ...bundle,
+      version: 2 as const,
+      tables: { ...tables, case_reviews: reviews },
+    };
+    const files = { "files/capture-a": new Uint8Array([1, 2, 3]) };
+    expect(
+      (await decodeBackup(await encodeBackup(v2, files))).bundle.tables
+        .case_reviews,
+    ).toEqual(reviews);
+    await expect(
+      decodeBackup(await encodeBackup({ ...bundle, version: 2 }, files)),
+    ).rejects.toThrow("INVALID_BACKUP");
   });
   it("rejects corruption of an evidence file", async () => {
     const files = unzipSync(

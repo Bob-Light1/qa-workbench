@@ -65,6 +65,10 @@ after each substantial campaign and before a schema/deployment operation. Keep a
 least the latest three verified archives on a separate machine or private location.
 Free hosting does not supply an automatic backup guarantee.
 
+Current exports use archive format 2 and include revision-bound review history.
+Use the current restore CLI and all migrations (including case reviews). Older
+format-1 archives are accepted with an empty review history when absent.
+
 To restore, prepare an empty Supabase installation with the same migrations and
 private evidence bucket. Configure its server credentials and QA_EMAIL to the
 administrator email included in the archive, then run:

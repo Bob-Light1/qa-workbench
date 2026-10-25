@@ -40,6 +40,10 @@ import {
 } from "./api";
 import {
   friendlyError,
+  latestCaseReview,
+  caseReviewLabel,
+  reviewDecisions,
+  type CaseReview,
   parseSteps,
   validateImage,
   validateNewPassword,
@@ -61,6 +65,7 @@ import {
 
 type Project = { id: string; name: string };
 type Data = {
+  reviews: CaseReview[];
   cases: TestCase[];
   campaigns: Campaign[];
   items: Item[];
@@ -76,6 +81,7 @@ type Data = {
   }[];
 };
 const empty: Data = {
+  reviews: [],
   cases: [],
   campaigns: [],
   items: [],
@@ -331,6 +337,10 @@ export function App() {
     [busy, setBusy] = useState(false),
     [loading, setLoading] = useState(false);
   const [caseEditor, setCaseEditor] = useState<TestCase | "new" | null>(null),
+    [reviewEditor, setReviewEditor] = useState<{
+      value: TestCase;
+      previous: string | null;
+    } | null>(null),
     [campaignEditor, setCampaignEditor] = useState(false),
     [campaignId, setCampaignId] = useState(""),
     [active, setActive] = useState<Execution | null>(null),
@@ -365,6 +375,7 @@ export function App() {
     try {
       const [
         cases,
+        reviews,
         campaigns,
         items,
         executions,
@@ -375,6 +386,7 @@ export function App() {
         events,
       ] = await Promise.all([
         rows<TestCase>("test_cases", p),
+        rows<CaseReview>("case_reviews", p),
         rows<Campaign>("campaigns", p),
         rows<Item>("campaign_items", p),
         rows<Execution>("executions", p),
@@ -386,6 +398,7 @@ export function App() {
       ]);
       setData({
         cases,
+        reviews,
         campaigns,
         items,
         executions,
@@ -445,6 +458,7 @@ export function App() {
     setActive(null);
     setActiveIssue(null);
     setCaseEditor(null);
+    setReviewEditor(null);
     setCaseView("catalog");
     if (project) reload(project).catch((e) => setError(friendlyError(e)));
   }, [project]);
@@ -895,6 +909,7 @@ export function App() {
                             <th>Briques</th>
                             <th>Durée</th>
                             <th>Version</th>
+                            <th>Revue</th>
                             <th>Actions</th>
                           </tr>
                         </thead>
@@ -926,6 +941,12 @@ export function App() {
                                 <td>{c.body.bricks.join(" · ")}</td>
                                 <td>{c.body.minutes} min</td>
                                 <td>v{c.version}</td>
+                                <td>
+                                  {caseReviewLabel(
+                                    c,
+                                    latestCaseReview(data.reviews, c.id),
+                                  )}
+                                </td>
                                 <td className="actions">
                                   <button onClick={() => setCaseEditor(c)}>
                                     {editor && !c.archived
@@ -934,6 +955,20 @@ export function App() {
                                   </button>
                                   <button onClick={() => openHistory(c)}>
                                     Historique
+                                  </button>
+                                  <button
+                                    onClick={() =>
+                                      setReviewEditor({
+                                        value: c,
+                                        previous:
+                                          latestCaseReview(data.reviews, c.id)
+                                            ?.id ?? null,
+                                      })
+                                    }
+                                  >
+                                    {editor && !c.archived
+                                      ? "Relire"
+                                      : "Voir les revues"}
                                   </button>
                                   {editor && (
                                     <button
@@ -1413,6 +1448,35 @@ export function App() {
                 await reload();
               });
               if (ok) setCaseEditor(null);
+            }}
+          />
+        </Modal>
+      )}
+      {reviewEditor && (
+        <Modal
+          title={`Revue — ${reviewEditor.value.code} · v${reviewEditor.value.version}`}
+          close={() => setReviewEditor(null)}
+        >
+          <CaseReviewForm
+            value={reviewEditor.value}
+            reviews={data.reviews.filter(
+              (r) => r.case_id === reviewEditor.value.id,
+            )}
+            editable={editor && !reviewEditor.value.archived}
+            memberName={memberName}
+            busy={busy}
+            save={async (decision, notes) => {
+              const ok = await run(async () => {
+                await rpc("review_case", {
+                  p_case: reviewEditor.value.id,
+                  p_version: reviewEditor.value.version,
+                  p_previous: reviewEditor.previous,
+                  p_decision: decision,
+                  p_notes: notes,
+                });
+                await reload();
+              });
+              if (ok) setReviewEditor(null);
             }}
           />
         </Modal>
@@ -2190,5 +2254,101 @@ function IssueForm({
           </div>
         ))}
     </>
+  );
+}
+
+function CaseReviewForm({
+  value,
+  reviews,
+  editable,
+  memberName,
+  busy,
+  save,
+}: {
+  value: TestCase;
+  reviews: CaseReview[];
+  editable: boolean;
+  memberName: (id: string | null) => string;
+  busy: boolean;
+  save: (decision: string, notes: string) => Promise<void>;
+}) {
+  const [decision, setDecision] = useState("approved");
+  const latest = latestCaseReview(reviews, value.id);
+  return (
+    <div>
+      <p>
+        <Tag>{caseReviewLabel(value, latest)}</Tag>
+      </p>
+      <h3>{value.body.title}</h3>
+      <p>{value.body.objective}</p>
+      <p>
+        Domaine : {value.body.domain} · Briques :{" "}
+        {value.body.bricks.join(" · ")} · Durée estimée : {value.body.minutes}{" "}
+        min
+      </p>
+      <p>Prérequis : {value.body.prerequisites || "Aucun"}</p>
+      <p>Référence roadmap : {value.body.roadmap || "Non renseignée"}</p>
+      <p>Sources : {value.body.source || "Non renseignées"}</p>
+      <ol>
+        {value.body.steps.map((s, i) => (
+          <li key={i}>
+            {s.action}
+            <p className="muted">Attendu : {s.expected}</p>
+          </li>
+        ))}
+      </ol>
+      {editable && (
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            const fields = new FormData(e.currentTarget);
+            void save(decision, String(fields.get("notes") || ""));
+          }}
+        >
+          <p>
+            Votre avis porte uniquement sur cette version de la fiche. Il ne
+            valide pas le résultat d’un test ni l’acceptation de l’ERP.
+          </p>
+          <Field label="Avis de revue">
+            <select
+              value={decision}
+              onChange={(e) => setDecision(e.target.value)}
+            >
+              {Object.entries(reviewDecisions).map(([key, label]) => (
+                <option key={key} value={key}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <Field label="Commentaire de revue">
+            <textarea
+              name="notes"
+              maxLength={4000}
+              required={decision === "changes_requested"}
+            />
+          </Field>
+          <button className="primary" disabled={busy}>
+            Enregistrer la revue
+          </button>
+        </form>
+      )}
+      <h3>Historique des revues</h3>
+      {!reviews.length && <p>Aucune revue enregistrée.</p>}
+      {[...reviews]
+        .sort((a, b) => b.review_number - a.review_number)
+        .map((r) => (
+          <div className="history-entry" key={r.id}>
+            <Tag>
+              v{r.case_version} · {reviewDecisions[r.decision]}
+            </Tag>
+            <p>
+              {memberName(r.author_id)} ·{" "}
+              {new Date(r.created_at).toLocaleString("fr-FR")}
+            </p>
+            <p>{r.notes || "Sans commentaire"}</p>
+          </div>
+        ))}
+    </div>
   );
 }

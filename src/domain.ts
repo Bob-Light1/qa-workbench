@@ -20,6 +20,31 @@ export type TestCase = {
   version: number;
   archived: boolean;
 };
+export type CaseReview = {
+  id: string;
+  project_id: string;
+  case_id: string;
+  case_version: number;
+  review_number: number;
+  decision: "approved" | "changes_requested";
+  notes: string;
+  author_id: string;
+  created_at: string;
+};
+export const reviewDecisions = {
+  approved: "Approuvée",
+  changes_requested: "À corriger",
+};
+export function latestCaseReview(reviews: CaseReview[], caseId: string) {
+  return reviews
+    .filter((r) => r.case_id === caseId)
+    .sort((a, b) => b.review_number - a.review_number)[0];
+}
+export function caseReviewLabel(c: TestCase, review?: CaseReview): string {
+  if (!review) return "À relire";
+  if (review.case_version !== c.version) return "À relire après modification";
+  return reviewDecisions[review.decision];
+}
 export type Campaign = {
   id: string;
   name: string;
@@ -147,6 +172,10 @@ export function friendlyError(error: unknown): string {
   const messages: Record<string, string> = {
     VERSION_CONFLICT:
       "Cette donnée a été modifiée ailleurs. Rechargez avant de réessayer.",
+    CASE_ARCHIVED: "Restaurez la fiche avant de la relire.",
+    REVIEW_NOTES_REQUIRED: "Décrivez les corrections demandées.",
+    INVALID_REVIEW:
+      "Choisissez un avis et une note de 4 000 caractères maximum.",
     FORBIDDEN: "Vous ne disposez pas des droits nécessaires.",
     LAST_ADMIN: "Conservez au moins un administrateur actif.",
     RESULT_IMMUTABLE:

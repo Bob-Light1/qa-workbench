@@ -18,7 +18,8 @@
     "db:start": "supabase start",
     "db:reset": "supabase db reset",
     "predeploy": "node --env-file-if-exists=.env.production.local scripts/deploy-check.mjs",
-    "deploy": "npm run build && wrangler pages deploy dist --project-name qa-workbench"
+    "deploy": "npm run build && wrangler pages deploy dist --project-name qa-workbench",
+    "test:reviews:api": "node --env-file=.env.local scripts/review-check.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.0.0",

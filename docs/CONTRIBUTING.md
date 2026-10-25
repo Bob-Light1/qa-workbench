@@ -73,7 +73,7 @@ may be used for a temporary session. CLI reads return JSON; failures exit nonzer
 
 RPCs: create_project, save_case, archive_case, start_campaign, assign_item,
 set_campaign_status, begin_execution, save_execution, report_issue, update_issue,
-reserve_attachment, finish_attachment, change_member, export_bundle. Each has typed
+reserve_attachment, finish_attachment, change_member, review_case, export_bundle. Each has typed
 SQL arguments in the migrations and is exercised through scripts/integration.mjs.
 Writes returning VERSION_CONFLICT must be refreshed and reviewed, never blindly retried.
 The access Edge Function accepts POST with action=invite/recovery, project_id and
@@ -87,3 +87,15 @@ permissions/history/recovery, then update design if a permanent decision changed
 Update roadmap and current handoff with actual checks. For an ERP change, link
 case IDs or record no manual-QA impact in the ERP task note. Never infer delivery
 from a generated UI, historical green tests or a successful static deployment alone.
+
+For review acceptance, run `npm run test:reviews:api` on the same owned local stack,
+then `QA_BROWSER_ACCOUNTS=.env.review.browser npx playwright test tests/browser/reviews.spec.ts`.
+The API script adds isolated synthetic identities/projects without resetting existing
+workspaces. User JWTs verify grants, RLS, role withdrawal, comments, immutable
+history, concurrent reviews, stale case revisions and export. The real restore RPC
+is exercised in an empty transaction which is rolled back, preserving all previous
+local rows and Storage. This does not repeat Auth reprovisioning or evidence upload
+from the phase-1 full restoration test. The dedicated browser journey checks stale
+opinions, edits, persisted history, failed requests and tester read-only access.
+Review fixtures and archives remain ignored/private. New ZIPs use format 2; the
+codec/restore also accept format 1 with an absent review table.

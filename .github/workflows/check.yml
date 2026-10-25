@@ -21,5 +21,7 @@ jobs:
       - run: npm run test:browser
       - run: npm run test:coverage:api
       - run: QA_BROWSER_ACCOUNTS=.env.coverage.browser npx playwright test tests/browser/coverage.spec.ts
+      - run: npm run test:reviews:api
+      - run: QA_BROWSER_ACCOUNTS=.env.review.browser npx playwright test tests/browser/reviews.spec.ts
       - if: always()
         run: npx supabase stop

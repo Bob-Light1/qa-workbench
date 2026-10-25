@@ -81,6 +81,7 @@ export const backupTables = [
   "profiles",
   "test_cases",
   "case_versions",
+  "case_reviews",
   "campaigns",
   "campaign_items",
   "executions",
@@ -107,7 +108,7 @@ export async function exportProject(project: string) {
   const bytes = await encodeBackup(
     {
       format: "qa-workbench",
-      version: 1,
+      version: 2,
       exported_at: new Date().toISOString(),
       project_id: project,
       tables: tables as Record<string, Record<string, unknown>[]>,
