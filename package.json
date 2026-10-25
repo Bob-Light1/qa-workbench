@@ -13,6 +13,7 @@
     "test": "vitest run",
     "test:browser": "playwright test",
     "test:integration": "node --env-file-if-exists=.env.local scripts/integration.mjs",
+    "test:coverage:api": "node --env-file=.env.local scripts/coverage-check.mjs",
     "qa": "node --env-file-if-exists=.env.local scripts/qa.mjs",
     "db:start": "supabase start",
     "db:reset": "supabase db reset",

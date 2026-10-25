@@ -19,5 +19,7 @@ jobs:
       - run: npm run test:integration
       - run: npx playwright install --with-deps chromium
       - run: npm run test:browser
+      - run: npm run test:coverage:api
+      - run: QA_BROWSER_ACCOUNTS=.env.coverage.browser npx playwright test tests/browser/coverage.spec.ts
       - if: always()
         run: npx supabase stop

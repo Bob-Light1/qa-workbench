@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import type { Session } from "@supabase/supabase-js";
+import { CaseCoverage } from "./CaseCoverage";
 import {
   LayoutDashboard,
   ListChecks,
@@ -324,6 +325,7 @@ export function App() {
     [data, setData] = useState<Data>(empty),
     [tab, setTab] = useState("dashboard"),
     [filter, setFilter] = useState(""),
+    [caseView, setCaseView] = useState<"catalog" | "coverage">("catalog"),
     [error, setError] = useState(""),
     [notice, setNotice] = useState(""),
     [busy, setBusy] = useState(false),
@@ -443,6 +445,7 @@ export function App() {
     setActive(null);
     setActiveIssue(null);
     setCaseEditor(null);
+    setCaseView("catalog");
     if (project) reload(project).catch((e) => setError(friendlyError(e)));
   }, [project]);
   const refresh = () =>
@@ -855,70 +858,110 @@ export function App() {
                       ) : null
                     }
                   />
-                  <SearchBox value={filter} set={setFilter} />
-                  <div className="panel table-wrap">
-                    <table>
-                      <thead>
-                        <tr>
-                          <th>Fiche</th>
-                          <th>Domaine</th>
-                          <th>Briques</th>
-                          <th>Durée</th>
-                          <th>Version</th>
-                          <th>Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {data.cases
-                          .filter((c) =>
-                            (c.code + " " + c.body.title + " " + c.body.domain)
-                              .toLowerCase()
-                              .includes(filter.toLowerCase()),
-                          )
-                          .map((c) => (
-                            <tr key={c.id}>
-                              <td>
-                                <small className="code">{c.code}</small>
-                                <strong>{c.body.title}</strong>
-                                {c.archived && <Tag>Archivée</Tag>}
-                              </td>
-                              <td>{c.body.domain}</td>
-                              <td>{c.body.bricks.join(" · ")}</td>
-                              <td>{c.body.minutes} min</td>
-                              <td>v{c.version}</td>
-                              <td className="actions">
-                                <button onClick={() => setCaseEditor(c)}>
-                                  {editor && !c.archived ? "Modifier" : "Lire"}
-                                </button>
-                                <button onClick={() => openHistory(c)}>
-                                  Historique
-                                </button>
-                                {editor && (
-                                  <button
-                                    disabled={busy}
-                                    onClick={() =>
-                                      run(async () => {
-                                        await rpc("archive_case", {
-                                          p_id: c.id,
-                                          p_version: c.version,
-                                          p_archived: !c.archived,
-                                        });
-                                        await reload();
-                                      })
-                                    }
-                                  >
-                                    {c.archived ? "Restaurer" : "Archiver"}
-                                  </button>
-                                )}
-                              </td>
-                            </tr>
-                          ))}
-                      </tbody>
-                    </table>
-                    {!data.cases.length && (
-                      <Empty text="Créez une fiche ou importez les dix scénarios de démarrage avec la commande documentée." />
-                    )}
+                  <div className="case-views" aria-label="Affichage des fiches">
+                    <button
+                      className="secondary"
+                      aria-pressed={caseView === "catalog"}
+                      onClick={() => setCaseView("catalog")}
+                    >
+                      Catalogue
+                    </button>
+                    <button
+                      className="secondary"
+                      aria-pressed={caseView === "coverage"}
+                      onClick={() => setCaseView("coverage")}
+                    >
+                      Couverture roadmap
+                    </button>
                   </div>
+                  <SearchBox value={filter} set={setFilter} />
+                  {caseView === "coverage" ? (
+                    <CaseCoverage
+                      key={project}
+                      cases={data.cases}
+                      campaigns={data.campaigns}
+                      items={data.items}
+                      executions={data.executions}
+                      search={filter}
+                      openCase={setCaseEditor}
+                    />
+                  ) : (
+                    <div className="panel table-wrap">
+                      <table>
+                        <thead>
+                          <tr>
+                            <th>Fiche</th>
+                            <th>Domaine</th>
+                            <th>Briques</th>
+                            <th>Durée</th>
+                            <th>Version</th>
+                            <th>Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {data.cases
+                            .filter((c) =>
+                              (
+                                c.code +
+                                " " +
+                                c.body.title +
+                                " " +
+                                c.body.domain +
+                                " " +
+                                c.body.roadmap +
+                                " " +
+                                c.body.bricks.join(" ")
+                              )
+                                .toLowerCase()
+                                .includes(filter.toLowerCase()),
+                            )
+                            .map((c) => (
+                              <tr key={c.id}>
+                                <td>
+                                  <small className="code">{c.code}</small>
+                                  <strong>{c.body.title}</strong>
+                                  {c.archived && <Tag>Archivée</Tag>}
+                                </td>
+                                <td>{c.body.domain}</td>
+                                <td>{c.body.bricks.join(" · ")}</td>
+                                <td>{c.body.minutes} min</td>
+                                <td>v{c.version}</td>
+                                <td className="actions">
+                                  <button onClick={() => setCaseEditor(c)}>
+                                    {editor && !c.archived
+                                      ? "Modifier"
+                                      : "Lire"}
+                                  </button>
+                                  <button onClick={() => openHistory(c)}>
+                                    Historique
+                                  </button>
+                                  {editor && (
+                                    <button
+                                      disabled={busy}
+                                      onClick={() =>
+                                        run(async () => {
+                                          await rpc("archive_case", {
+                                            p_id: c.id,
+                                            p_version: c.version,
+                                            p_archived: !c.archived,
+                                          });
+                                          await reload();
+                                        })
+                                      }
+                                    >
+                                      {c.archived ? "Restaurer" : "Archiver"}
+                                    </button>
+                                  )}
+                                </td>
+                              </tr>
+                            ))}
+                        </tbody>
+                      </table>
+                      {!data.cases.length && (
+                        <Empty text="Créez une fiche ou importez les dix scénarios de démarrage avec la commande documentée." />
+                      )}
+                    </div>
+                  )}
                 </>
               )}
               {tab === "campaigns" && (

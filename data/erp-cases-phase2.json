@@ -1,0 +1,83 @@
+[
+  {
+    "code": "ERP-011",
+    "body": {
+      "title": "Refus d’une URL d’un autre campus",
+      "objective": "Vérifier la frontière entre campus lors d’un accès direct depuis le navigateur.",
+      "prerequisites": "ERP local et deux campus synthétiques A et B actifs. Compte gestionnaire A et identifiants des deux campus fournis séparément. Module étudiants actif sur A. Ce contrôle de navigation complète ERP-005 ; il ne remplace pas les tests de refus API CH-2.",
+      "steps": [
+        {
+          "action": "Se connecter comme gestionnaire A puis ouvrir http://localhost:5173/campus/IDENTIFIANT_A/students en remplaçant IDENTIFIANT_A par l’identifiant fourni.",
+          "expected": "La liste des étudiants du campus A se charge ; le compte dispose bien d’un accès autorisé de référence."
+        },
+        {
+          "action": "Remplacer uniquement l’identifiant du campus dans l’URL par celui du campus B puis recharger.",
+          "expected": "Un refus d’accès au campus est affiché ; aucune liste ni fiche du campus B n’est présentée. Une liste simplement vide ne constitue pas un refus explicite."
+        },
+        {
+          "action": "Utiliser le retour vers son campus puis rouvrir la liste des étudiants A.",
+          "expected": "Le campus A reste accessible sans élévation de rôle ni perte de session."
+        }
+      ],
+      "minutes": 10,
+      "domain": "Isolation campus",
+      "bricks": ["B1", "B2"],
+      "roadmap": "Socle multi-campus ; QA CH-2 complément manuel",
+      "source": "frontend/src/routes/CampusGuard.jsx; frontend/src/routes/CampusRoutes.jsx; frontend/src/App.jsx"
+    }
+  },
+  {
+    "code": "ERP-012",
+    "body": {
+      "title": "Refus de l’espace administrateur à un étudiant",
+      "objective": "Vérifier qu’un rôle étudiant ne peut pas ouvrir un écran administrateur par URL directe.",
+      "prerequisites": "ERP local démarré. Compte étudiant synthétique actif fourni séparément. Contexte navigateur vierge, distinct du contexte administrateur. Ce scénario porte sur le refus dans l’interface ; les autorisations API se vérifient séparément.",
+      "steps": [
+        {
+          "action": "Ouvrir http://localhost:5173/login, choisir le rôle étudiant et se connecter avec les identifiants fournis.",
+          "expected": "L’espace étudiant autorisé est accessible."
+        },
+        {
+          "action": "Ouvrir directement http://localhost:5173/admin/dashboard puis recharger.",
+          "expected": "Un refus d’accès explicite est affiché ; aucun tableau de bord administrateur ni donnée de gestion globale n’est chargé dans l’interface."
+        },
+        {
+          "action": "Revenir à l’adresse de l’espace étudiant précédemment ouvert puis recharger.",
+          "expected": "La session étudiant reste utilisable avec son rôle initial."
+        }
+      ],
+      "minutes": 10,
+      "domain": "Authentification",
+      "bricks": ["B1", "B2"],
+      "roadmap": "Phase 1-B, ligne 3",
+      "source": "frontend/src/routes/ProtectedRoute.jsx; frontend/src/routes/AdminRoutes.jsx; frontend/src/App.jsx; frontend/src/components/LoginPage.jsx"
+    }
+  },
+  {
+    "code": "ERP-013",
+    "body": {
+      "title": "Module finance non activé par URL directe",
+      "objective": "Vérifier qu’un lien direct vers un module masqué aboutit à une indisponibilité compréhensible.",
+      "prerequisites": "ERP local réservé. Campus synthétique dont le responsable a configuré le module finance comme masqué, et non en lecture seule. Compte gestionnaire du campus fourni séparément. Conserver la configuration initiale pour la restaurer après le scénario. Aucun service partagé ne doit être modifié.",
+      "steps": [
+        {
+          "action": "Se connecter comme gestionnaire du campus réservé et ouvrir son tableau de bord.",
+          "expected": "Le tableau de bord reste utilisable et la navigation ne propose pas le module finance masqué."
+        },
+        {
+          "action": "Ouvrir directement http://localhost:5173/campus/IDENTIFIANT_CAMPUS/finance en remplaçant IDENTIFIANT_CAMPUS par l’identifiant fourni, puis recharger.",
+          "expected": "Un écran explicite indique que le module n’est pas activé. Aucun historique financier, formulaire de paiement ni chargement sans fin n’est affiché."
+        },
+        {
+          "action": "Revenir au tableau de bord du campus, puis demander au responsable de restaurer la configuration initiale.",
+          "expected": "La session et le tableau de bord restent utilisables ; la configuration locale initiale est restaurée. Ce résultat ne vaut pas validation des refus API."
+        }
+      ],
+      "minutes": 10,
+      "domain": "Disponibilité des modules",
+      "bricks": ["B1", "B2"],
+      "roadmap": "Phase 1-B, ligne 2",
+      "source": "frontend/src/routes/FeatureGuard.jsx; frontend/src/routes/CampusRoutes.jsx; frontend/src/hooks/useFeature.js"
+    }
+  }
+]

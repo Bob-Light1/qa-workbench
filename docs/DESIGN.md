@@ -107,5 +107,13 @@ Automation may suggest coverage changes; a human approves expected business beha
 - Keep the code private until the owner selects a publication/license policy.
 - Use provider-native APIs plus a small CLI for agents; no custom agent platform.
 - Finalized test outcomes are historical evidence; fixing a case never rewrites them.
+- 2026-10-23: roadmap coverage groups active cases by their exact current roadmap
+  reference, trimmed without inferring equivalence between prose references. Each
+  case counts once within the selected campaign or all campaigns. Only the latest
+  submitted execution of the exact current revision supplies its verdict. Older
+  results are retained as context and marked for re-execution; drafts supply no
+  verdict. Environment, build references and executed roadmap reference remain
+  visible. This inventories linked cases, not all ERP work items or CH-* acceptance.
+  No schema or backup-format change is required.
 
 See [roadmap](ROADMAP.md) for status and [operations](OPERATIONS.md) for provider limits.

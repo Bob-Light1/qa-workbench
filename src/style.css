@@ -631,6 +631,42 @@ td select {
   overflow-x: auto;
   padding-bottom: 15px;
 }
+.case-views {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.case-views [aria-pressed="true"] {
+  background: #eaf3e4;
+  border-color: #86a06c;
+}
+.coverage-intro .field {
+  max-width: 560px;
+  font-size: 12px;
+}
+.coverage-group {
+  margin-bottom: 20px;
+}
+.coverage-group h3 {
+  margin: 0;
+}
+.coverage-group td {
+  overflow-wrap: anywhere;
+  max-width: 340px;
+}
+.coverage-group .text-button {
+  text-align: left;
+  justify-content: flex-start;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
 .campaign-tabs button {
   border: 1px solid #e1e6dc;
   background: #fff;

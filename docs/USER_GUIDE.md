@@ -53,6 +53,31 @@ ou annuler l’entrée avant de recommencer. Terminer ou annuler les envois en a
 avant de finaliser. Ne jamais joindre de mot de passe, lien d’invitation ou donnée
 personnelle réelle. Les captures restent privées aux membres du projet.
 
+## Lire la couverture d’un chantier
+
+Dans **Fiches de test**, choisir **Couverture roadmap**. Les fiches actives sont
+regroupées selon leur référence roadmap actuelle. La recherche accepte aussi une
+référence, un domaine ou une brique. Les fiches sans référence restent visibles
+dans **Sans référence roadmap** ; les fiches archivées ne sont pas comptées.
+
+Choisir une campagne pour limiter les résultats à cet environnement. **Toutes les
+campagnes** affiche le dernier résultat soumis de la version actuelle de chaque
+fiche, avec sa campagne, l’environnement et les versions techniques. Un brouillon
+ne compte pas comme résultat. **À exécuter** désigne une version actuelle présente
+en campagne sans résultat soumis ; **Hors campagne** indique qu’elle n’y est pas
+encore planifiée.
+
+Après modification d’une fiche, **À réexécuter** conserve l’ancien verdict et sa
+version sans valider les nouvelles consignes. Créer une nouvelle campagne avec la
+version actuelle pour la tester. Cliquer sur une fiche permet de la consulter ou
+de la modifier avec les droits nécessaires.
+
+Cette vue montre les fiches liées aux chantiers renseignés. Elle ne recense pas les
+chantiers sans fiche et ne prononce pas la validation d’un chantier ERP. Les fiches
+ERP-011 à ERP-013 peuvent être importées séparément par le responsable, selon la
+commande de [contribution](CONTRIBUTING.md). Leur import ne constitue pas une
+exécution des tests ERP.
+
 ## Signaler un problème et vérifier la correction
 
 Depuis un résultat validé, créer un signalement. Choisir **Anomalie produit**,

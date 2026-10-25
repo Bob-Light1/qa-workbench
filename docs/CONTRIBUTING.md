@@ -13,6 +13,8 @@ local environment files with `node scripts/local-env.mjs`. Commands run at repo 
 - scripts/: scoped CLI, local setup, backup/restore and integration verification.
 - data/erp-cases.json: French pilot cases, no account secrets.
 - tests/: unit and browser checks. Integration script uses the actual owned stack.
+- src/coverage.ts and src/CaseCoverage.tsx: revision-aware roadmap coverage.
+- data/erp-cases-phase2.json: optional ERP-011–ERP-013 catalog; starter cases unchanged.
 
 ## Validation
 
@@ -37,6 +39,19 @@ starting Vite. Keep this file private. The hosted acceptance project contains on
 synthetic identities and results, separately from the owner's ERP campaigns.
 CI repeats this sequence on disposable local Supabase containers.
 
+For coverage acceptance, `npm run test:coverage:api` provisions a separate synthetic
+project and four test accounts on the owned local validation stack, without resets.
+Server credentials only provision isolated fixtures; imports, snapshots, results
+and allow/deny assertions use user JWTs. Coverage is also computed from actual
+API rows to check revision boundaries. It writes ignored `.env.coverage.browser`.
+Run `QA_BROWSER_ACCOUNTS=.env.coverage.browser npm run test:browser` for coverage
+and existing workflow/export journeys. The coverage journey skips if its dedicated
+fixture IDs are absent. This local acceptance does not establish hosted delivery.
+Repeated API runs retain separate synthetic projects for inspection.
+CI runs this additive API acceptance and its dedicated browser journey after the
+phase-1 integration and browser suite; a configured workflow is not an executed
+remote CI run.
+
 ## API and agent interface
 
 Auth supplies user JWTs; all ordinary data access uses the same RLS as the UI.
@@ -49,6 +64,7 @@ npm run qa -- projects
 npm run qa -- cases PROJECT_UUID
 npm run qa -- failures PROJECT_UUID
 npm run qa -- import PROJECT_UUID data/erp-cases.json
+npm run qa -- import PROJECT_UUID data/erp-cases-phase2.json
 npm run qa -- backup PROJECT_UUID backups/project.zip
 ```
 
