@@ -16,6 +16,7 @@ jobs:
       - run: npx supabase start --exclude realtime,imgproxy,studio,postgres-meta,logflare,vector,supavisor > /tmp/qa-stack.log 2>&1
       - run: node scripts/local-env.mjs
       - run: nohup npx supabase functions serve --env-file .env.functions.local > /tmp/qa-functions.log 2>&1 &
+      - run: npm run functions:wait
       - run: npm run test:integration
       - run: npx playwright install --with-deps chromium
       - run: npm run test:browser

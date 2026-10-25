@@ -5,17 +5,14 @@ import { createClient } from "@supabase/supabase-js";
 import { client, call } from "./client.mjs";
 import { backup } from "./backup.mjs";
 import { decodeBackup } from "../src/backup.ts";
+import { acceptanceTarget } from "./acceptance-target.mjs";
 
 const config = await readFile("supabase/config.toml", "utf8");
-if (
-  !/^project_id\s*=\s*"qa-workbench-validation"\s*$/m.test(config) ||
-  !["http://127.0.0.1:55321", "http://localhost:55321"].includes(
-    process.env.SUPABASE_URL,
-  )
-)
-  throw new Error(
-    "Review acceptance requires the owned local validation stack.",
-  );
+const target = acceptanceTarget(
+  process.env.SUPABASE_URL,
+  process.argv.includes("--hosted"),
+  config,
+);
 const admin = client(true),
   key = process.env.SUPABASE_PUBLISHABLE_KEY;
 const password = crypto.randomUUID() + "aA1!",
@@ -264,10 +261,9 @@ await call(owner, "change_member", {
   p_active: true,
 });
 await mkdir("backups", { recursive: true });
-const tables = await backup(owner, project, "backups/review-acceptance.zip");
-const { bundle } = await decodeBackup(
-  new Uint8Array(await readFile("backups/review-acceptance.zip")),
-);
+const archive = `backups/review${target.suffix}-acceptance.zip`;
+const tables = await backup(owner, project, archive);
+const { bundle } = await decodeBackup(new Uint8Array(await readFile(archive)));
 check(
   "v2 export preserves exact review rows",
   bundle.version === 2 &&
@@ -287,7 +283,8 @@ await rejected(
 // Exercise the real restore RPC in an empty transactional target. ROLLBACK preserves
 // every existing workspace, Auth identity and Storage object in the local stack.
 // The exported fixture contains no files, so no object manipulation is required.
-const sql = `\\set ON_ERROR_STOP on
+if (!target.hosted) {
+  const sql = `\\set ON_ERROR_STOP on
 begin;
 create temp table acceptance_bundle as select '${JSON.stringify(tables).replaceAll("'", "''")}'::jsonb as body;
 delete from public.attachments; delete from public.issue_events; delete from public.issues;
@@ -318,26 +315,31 @@ select public.restore_bundle((select body from acceptance_bundle),'${users.owner
 do $$ begin if not exists(select 1 from public.case_reviews where decision='changes_requested' and notes=chr(10)||chr(9))
  then raise exception 'HISTORICAL_NOTES_REWRITTEN'; end if; end $$;
 rollback;`;
-execFileSync(
-  "docker",
-  [
-    "exec",
-    "-i",
-    "supabase_db_qa-workbench-validation",
-    "psql",
-    "-U",
-    "postgres",
-    "-d",
-    "postgres",
-  ],
-  { input: sql, stdio: ["pipe", "pipe", "pipe"] },
-);
-check(
-  "real restore RPC preserves review history, earlier notes and legacy bundles in rolled-back empty target",
-  (await rows(owner, "case_reviews", project)).length === 3,
-);
+  execFileSync(
+    "docker",
+    [
+      "exec",
+      "-i",
+      "supabase_db_qa-workbench-validation",
+      "psql",
+      "-U",
+      "postgres",
+      "-d",
+      "postgres",
+    ],
+    { input: sql, stdio: ["pipe", "pipe", "pipe"] },
+  );
+  check(
+    "real restore RPC preserves review history, earlier notes and legacy bundles in rolled-back empty target",
+    (await rows(owner, "case_reviews", project)).length === 3,
+  );
+} else {
+  console.log(
+    "Hosted restore intentionally excluded; hosted acceptance only adds isolated synthetic fixtures.",
+  );
+}
 await writeFile(
-  ".env.review.browser",
+  `.env.review${target.suffix}.browser`,
   JSON.stringify({
     email: users.owner.email,
     testerEmail: users.tester.email,
@@ -350,5 +352,5 @@ await writeFile(
   { mode: 0o600 },
 );
 console.log(
-  `Review acceptance: ${checks} checks passed. Private browser fixtures saved.`,
+  `${target.label} review acceptance: ${checks} checks passed. Private browser fixtures saved.`,
 );

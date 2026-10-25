@@ -247,9 +247,17 @@ test.describe("Individual access", () => {
     await admin
       .getByLabel("Adresse e-mail", { exact: true })
       .fill(`activation-${Date.now()}@qa-workbench.test`);
+    const accessResponse = admin.waitForResponse(
+      (response) =>
+        response.url().endsWith("/functions/v1/manage-access") &&
+        response.request().method() === "POST",
+      { timeout: 60000 },
+    );
     await admin
       .getByRole("button", { name: "Préparer l’accès", exact: true })
       .click();
+    // Check the real request without logging a response body containing the link.
+    expect((await accessResponse).status()).toBe(200);
     const link = await admin
       .getByLabel("Lien individuel", { exact: true })
       .inputValue();

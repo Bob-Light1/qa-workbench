@@ -4,18 +4,15 @@ import { execFileSync } from "node:child_process";
 import { createClient } from "@supabase/supabase-js";
 import { client, call } from "./client.mjs";
 import { caseCoverage } from "../src/coverage.ts";
+import { acceptanceTarget } from "./acceptance-target.mjs";
 
 // Add isolated synthetic fixtures; never reset or change an existing workspace.
 const config = await readFile("supabase/config.toml", "utf8");
-if (
-  !/^project_id\s*=\s*"qa-workbench-validation"\s*$/m.test(config) ||
-  !["http://127.0.0.1:55321", "http://localhost:55321"].includes(
-    process.env.SUPABASE_URL,
-  )
-)
-  throw new Error(
-    "Coverage acceptance requires the owned local validation stack.",
-  );
+const target = acceptanceTarget(
+  process.env.SUPABASE_URL,
+  process.argv.includes("--hosted"),
+  config,
+);
 const admin = client(true);
 const key = process.env.SUPABASE_PUBLISHABLE_KEY;
 const password = crypto.randomUUID() + "aA1!";
@@ -274,7 +271,7 @@ await call(owner, "change_member", {
   p_active: true,
 });
 await writeFile(
-  ".env.coverage.browser",
+  `.env.coverage${target.suffix}.browser`,
   JSON.stringify({
     email: users.owner.email,
     testerEmail: users.tester.email,
@@ -289,5 +286,5 @@ await writeFile(
   { mode: 0o600 },
 );
 console.log(
-  `Coverage API acceptance: ${checks} checks passed. Isolated browser fixtures saved privately; existing workspaces preserved.`,
+  `${target.label} coverage API acceptance: ${checks} checks passed. Isolated browser fixtures saved privately; existing workspaces preserved.`,
 );

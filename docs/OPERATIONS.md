@@ -6,6 +6,10 @@ See [design](DESIGN.md) for invariants and [handoff](current_task.md) for verifi
 
 Start the owned stack and run scripts/local-env.mjs as described in README.
 Serve Edge Functions with `npx supabase functions serve --env-file .env.functions.local`.
+In another terminal, run `npm run functions:wait` before acceptance. If it times out,
+inspect only the owned function runtime and its logs. A healthy database or running
+container does not prove function readiness. Allow cold startup to finish; preserve
+useful data and do not reset databases or restart shared services to repair a function.
 Bootstrap requires QA_EMAIL and a strong QA_PASSWORD supplied through a secure
 shell environment or an ignored .env.local (mode 600), never shell command arguments.
 
@@ -100,6 +104,33 @@ Cloudflare can republish a previously built frontend. Database migrations are
 append-only: use an additive repair migration instead of deleting applied history.
 Back up first. Avoid destructive schema changes that invalidate the previous frontend.
 If a failed release applied migrations, inspect actual migration state before retrying.
+
+## Pending P2-01 release
+
+The current hosted schema has migrations `202610220001`–`202610220004`. Coverage
+and reviews require these existing additive migrations, in this order:
+
+1. `202610250001_case_reviews.sql`: review table/RLS/RPC and archive/restore support.
+2. `202610250002_review_notes.sql`: reject whitespace-only requested changes.
+3. `202610250003_review_history_restore.sql`: retain earlier opinions on restore.
+
+Obtain explicit owner approval for this production schema change and frontend
+deployment. Automatic approval review refused the migration action during the
+2026-10-25 release preparation; no migration was applied. The files have already
+passed local API, concurrency, permission and rolled-back restore checks. They add
+review history without rewriting existing cases, executions or campaign snapshots.
+
+After approval, refresh and verify private archives of every existing project and
+its evidence. Apply all three files and their migration ledger entries atomically,
+then inspect the actual ledger. Keep the previous frontend available until hosted
+API checks pass. Run the opted-in hosted coverage/review acceptance documented in
+CONTRIBUTING.md; it creates isolated synthetic workspaces, never resets/restores
+hosted data. Build and scan assets for server secrets, publish to the existing
+`qa-workbench` Pages project, and run all HTTPS browser journeys with the corresponding
+private fixtures. Re-export review history and verify the downloaded archive.
+Record the new source commit and deployment identifier only after these checks.
+If a check fails, retain its real error and inspect state before retrying. Use an
+additive repair migration or the prior compatible frontend as appropriate.
 
 ## Free-host constraints and recovery
 

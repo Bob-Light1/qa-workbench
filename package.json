@@ -17,6 +17,7 @@
     "qa": "node --env-file-if-exists=.env.local scripts/qa.mjs",
     "db:start": "supabase start",
     "db:reset": "supabase db reset",
+    "functions:wait": "node --env-file-if-exists=.env.local scripts/wait-for-access.mjs",
     "predeploy": "node --env-file-if-exists=.env.production.local scripts/deploy-check.mjs",
     "deploy": "npm run build && wrangler pages deploy dist --project-name qa-workbench",
     "test:reviews:api": "node --env-file=.env.local scripts/review-check.mjs"

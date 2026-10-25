@@ -33,6 +33,11 @@ They also require project ID `qa-workbench-validation` and reject every non-loop
 or unexpected-port target. Never pass hosted credentials. On the initial machine,
 the test database is disposable RAM storage; see OPERATIONS.md.
 Browser tests use the generated synthetic accounts file, which is ignored by Git.
+After starting `supabase functions serve`, run `npm run functions:wait` before
+integration/browser acceptance. This bounded gate requires browser-compatible CORS,
+preflight 204 and unauthenticated POST 401; it detects a running container whose
+function handler is still unavailable. CI uses the same gate. It does not establish
+authenticated invitation success; the API/browser journeys still verify that.
 For the approved HTTPS deployment, set `QA_BROWSER_URL` and
 `QA_BROWSER_ACCOUNTS=.env.hosted.browser` to exercise the same journeys without
 starting Vite. Keep this file private. The hosted acceptance project contains only
@@ -48,6 +53,10 @@ Run `QA_BROWSER_ACCOUNTS=.env.coverage.browser npm run test:browser` for coverag
 and existing workflow/export journeys. The coverage journey skips if its dedicated
 fixture IDs are absent. This local acceptance does not establish hosted delivery.
 Repeated API runs retain separate synthetic projects for inspection.
+Coverage and review browser journeys revise their fixtures. Run the corresponding
+API setup again before repeating a browser journey; reusing consumed fixtures does
+not restore their initial revision/review state. Run browser suites sequentially
+because Playwright clears the shared `test-results` directory at startup.
 CI runs this additive API acceptance and its dedicated browser journey after the
 phase-1 integration and browser suite; a configured workflow is not an executed
 remote CI run.
@@ -99,3 +108,22 @@ from the phase-1 full restoration test. The dedicated browser journey checks sta
 opinions, edits, persisted history, failed requests and tester read-only access.
 Review fixtures and archives remain ignored/private. New ZIPs use format 2; the
 codec/restore also accept format 1 with an absent review table.
+
+For an authorized hosted release, the same additive coverage/review API scripts
+accept `--hosted` only with the exact existing QA Supabase URL. Load the ignored
+`.env.hosted.local` directly with Node 24; do not load it through the local npm
+scripts. They provision isolated synthetic projects and use user JWTs for behavior.
+Hosted review acceptance excludes the local transactional restore operation.
+
+```sh
+node --env-file=.env.hosted.local scripts/coverage-check.mjs --hosted
+node --env-file=.env.hosted.local scripts/review-check.mjs --hosted
+QA_BROWSER_URL=https://qa-workbench.pages.dev QA_BROWSER_ACCOUNTS=.env.coverage.hosted.browser npx playwright test tests/browser/coverage.spec.ts tests/browser/export.spec.ts tests/browser/workflow.spec.ts
+QA_BROWSER_URL=https://qa-workbench.pages.dev QA_BROWSER_ACCOUNTS=.env.review.hosted.browser npx playwright test tests/browser/reviews.spec.ts
+```
+
+The explicit flag and exact target are required together; no other hosted project
+is accepted. `.env.coverage.hosted.browser`, `.env.review.hosted.browser` and
+`backups/review.hosted-acceptance.zip` stay private/ignored. Run hosted checks only
+after a fresh verified backup and compatible migrations. Never run
+`test:integration` or reset/restore operations against hosted data.
