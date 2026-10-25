@@ -1,7 +1,7 @@
 # Current task and handoff
 
 Last updated: 2026-10-25.
-Status: PHASE 1 DELIVERED. P2-01 coverage increment validated locally; reviews remain open.
+Status: PHASE 1 DELIVERED. P2-01 coverage and reviews validated locally; hosted release open.
 Phase 3 not started.
 
 ## Objective and released state
@@ -163,3 +163,81 @@ authorization, stale-write handling and preservation in backup/restore. Broader
 ERP coverage and P2-02 remain open. The coverage increment is local and not a new
 online release: the deployed application remains source 891d37a at
 https://qa-workbench.pages.dev (deployment f485304d).
+
+## P2-01 review closeout — 2026-10-25
+
+Objective: continue the next planned review increment and commit validated work.
+Initial main was clean at bdbe7ee. Implementation commit:
+cb94df4878726baeaa92daa93c2ab58da58c16be. No subagents used.
+
+Changes and decisions:
+
+- Admins/editors append approved/changes-requested opinions to exact case revisions;
+  testers read them. History keeps actor, timestamp, opinion and comment. Requested
+  changes need a comment containing more than whitespace. Self-review is permitted.
+- The RPC obtains the current role server-side, locks the case and compares both
+  revision and previous review identity. Direct mutations are denied. Edits,
+  archive/restore and conflicting opinions cannot silently carry forward approval.
+  Reviews remain advisory and do not establish ERP acceptance or block campaigns.
+- The catalog shows review state; a dialog displays the full current case and
+  opinion history. Failed saves retain the dialog without claiming success.
+- Archive format 2 includes review history; format 1 remains readable/restorable.
+  The restore author-mapping loop includes the new table. New ordinary opinions
+  reject blank whitespace; server-only restoration preserves earlier accepted
+  opinions verbatim rather than rewriting history.
+- Three append-only migrations were applied only locally. A focused API check
+  exposed accepted newline/tab-only comments before repair. Applied migrations
+  were preserved: the follow-ups tighten the RPC and retain restore compatibility.
+  Design, French user guidance, operations, contributor commands and CI updated.
+- No ERP source, roadmap ordering, CH-* rules or ERP-001–013 content changed. This
+  Workbench coordination feature requires no manual ERP catalog revision.
+
+Checks actually completed:
+
+- TypeScript, 17 unit checks, production build, formatting and Git diff checks pass.
+  Vite retains its advisory size warning (about 510 kB JS minified, 150 kB gzip).
+- Review API acceptance: 29 checks pass using actual user JWTs and local Postgres.
+  Includes anonymous/tester/outsider denial, direct mutation denial even for an
+  admin, membership withdrawal, note validation, simultaneous opinions, stale
+  revisions, archival, frozen campaign snapshots and exact exported review rows.
+- The added newline/tab regression failed before repair, then passed. The real
+  restore RPC passed with exact review rows/actors, legacy archives without a review
+  table and earlier whitespace-only opinions, each in an empty transactional target
+  rolled back afterwards. Existing local projects, Auth and Storage were preserved.
+  The three-migration sequence also passed in a rolled-back recreation of the
+  review table. No destructive stack reset was performed.
+- Coverage API regression: all 13 checks pass on separately added synthetic fixtures.
+- The dedicated review browser journey passed three times (the last two include
+  downloading/decoding the v2 archive and checking all six opinions). It checks
+  stale-opinion refusal, correction, revision invalidation, server failure without
+  success, retained authors/history and tester read-only access. Final desktop and
+  mobile screenshots were visually inspected; mobile has no document overflow.
+- Existing browser coverage, complete archive including evidence, and two-account
+  failure/evidence/correction/retest journeys pass. The invitation journey timed out
+  awaiting its link. Subsequent local function readiness requests timed out, then
+  returned 503; the edge runtime was observed Dead. A serve retry did not recover
+  it and only that retry process was stopped. No all-green full browser run is
+  claimed; invitation activation remains an explicit local infrastructure blocker.
+
+Infrastructure and retained evidence:
+
+- The CLI migration command could not reach the local PostgreSQL port. After a
+  private public-schema data dump, migrations were applied transactionally through
+  psql inside the owned qa-workbench-validation container and recorded in its
+  migration ledger. Hosted schema/data/frontend and other applications are untouched.
+- Private evidence: backups/review-acceptance.zip, backups/local-before-reviews.sql,
+  backups/reviews-desktop.png and backups/reviews-mobile.png. The SQL file is a local
+  public-data safety snapshot, not a replacement for a complete portable archive.
+  Ignored .env.review.browser holds synthetic account credentials. Retained earlier
+  backups and the validation tmpfs/old-volume caveats above remain applicable.
+- The destructive phase-1 integration/empty-installation Auth reprovisioning and
+  Storage round trip was not rerun; the earlier 47-check result remains historical.
+  No hosted acceptance, deployment or remote CI execution is claimed. The online
+  release remains 891d37a at https://qa-workbench.pages.dev (deployment f485304d),
+  with hosted migrations 1–4. A working local increment is not online delivery.
+
+Next action: recover only the owned local Edge Function runtime and rerun invitation
+acceptance. Then prepare delivery of coverage/reviews with a fresh hosted archive,
+new migrations, frontend deployment and hosted allow/deny/review/export acceptance.
+Broader ERP coverage and P2-02 twenty-account/bulk work remain open. Do not reset
+useful local data or restart shared infrastructure to recover the function.

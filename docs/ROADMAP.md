@@ -24,7 +24,11 @@ data/erp-cases-phase2.json. It is not deployed. ERP-001–ERP-010 remain
 unchanged. New cases cover direct cross-campus navigation, student/admin role
 separation and hidden-module navigation, linked to existing ERP phase-1-B rows 2/3
 and the CH-2 manual complement. No ERP roadmap ordering or acceptance boundary
-changes. Revision-bound case review state is the next P2-01 increment; it and
-broader coverage remain open. Phase 3 has not
+changes. Revision-bound case reviews are also implemented and validated locally:
+admin/editor opinions, immutable author/revision history, stale/concurrent-write
+refusal, tester reads and portable archive format 2 with format-1 compatibility.
+These two increments still require a hosted release and hosted acceptance. Broader
+ERP coverage remains open; this coordination feature requires no ERP case changes.
+P2-02 remains next after the P2-01 delivery/coverage milestone. Phase 3 has not
 started. Building this app does not complete
 ERP CH-0 acceptance, CH-2, CH-4 or other existing QA work items.
