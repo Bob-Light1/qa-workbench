@@ -27,8 +27,12 @@ and the CH-2 manual complement. No ERP roadmap ordering or acceptance boundary
 changes. Revision-bound case reviews are also implemented and validated locally:
 admin/editor opinions, immutable author/revision history, stale/concurrent-write
 refusal, tester reads and portable archive format 2 with format-1 compatibility.
-These two increments still require a hosted release and hosted acceptance. Broader
-ERP coverage remains open; this coordination feature requires no ERP case changes.
+These two increments still require a hosted release and hosted acceptance.
+The local invitation runtime blocker was recovered on 2026-10-25. Release readiness
+and isolated hosted acceptance commands are prepared; production migrations and
+frontend publication await explicit owner approval after automatic approval review
+refused the schema change. No new online release is claimed.
+Broader ERP coverage remains open; this coordination feature requires no ERP case changes.
 P2-02 remains next after the P2-01 delivery/coverage milestone. Phase 3 has not
 started. Building this app does not complete
 ERP CH-0 acceptance, CH-2, CH-4 or other existing QA work items.

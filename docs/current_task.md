@@ -1,7 +1,7 @@
 # Current task and handoff
 
 Last updated: 2026-10-25.
-Status: PHASE 1 DELIVERED. P2-01 coverage and reviews validated locally; hosted release open.
+Status: PHASE 1 DELIVERED. P2-01 validated locally; production release awaits explicit approval.
 Phase 3 not started.
 
 ## Objective and released state
@@ -241,3 +241,88 @@ acceptance. Then prepare delivery of coverage/reviews with a fresh hosted archiv
 new migrations, frontend deployment and hosted allow/deny/review/export acceptance.
 Broader ERP coverage and P2-02 twenty-account/bulk work remain open. Do not reset
 useful local data or restart shared infrastructure to recover the function.
+
+## P2-01 release preparation closeout — 2026-10-25
+
+Objective: continue in documented order, recover invitation acceptance and deliver
+the existing coverage/review increments, then commit the verified changes. Initial
+main was clean at 93df62b. No subagents used. No ERP source or case content changes
+are needed for this Workbench delivery/validation work.
+Validated implementation commit: 27285676f7decabd9a89d4b2627fc8d0f851b6db.
+
+The owned Edge Function was absent at session start. Starting only
+`supabase functions serve --env-file .env.functions.local` recovered it without
+restarting databases or shared services. Its initial
+cold requests timed out; subsequent preflight and anonymous POST returned 204/401,
+and an authenticated synthetic invitation succeeded without logging its link.
+Added a bounded readiness command and CI gate, plus explicitly opted-in hosted
+coverage/review acceptance restricted to the exact existing QA Supabase project.
+Hosted fixtures and archives use separate private files; the transactional empty
+restore check remains local-only. Browser invitation acceptance now checks its
+real response status before reading the private link.
+
+Checks actually completed:
+
+- 24 unit checks, TypeScript, production build, changed-file formatting and Git diff
+  checks pass. Predeploy validation and an asset scan confirm the hosted API target
+  and absence of the configured service key, database password and owner contact.
+  Vite retains its advisory size warning (about 510 kB JS, 150 kB gzip).
+- A temporary mutant ignoring HTTP status made three readiness assertions fail,
+  including a functioning preflight with a failed POST. The original was restored
+  and all 24 unit checks passed again. Target guards check local allow/deny paths,
+  hosted opt-in, exact URL matching and separate fixture names. Hosted P2 behavior
+  itself remains unexecuted; these unit checks do not establish hosted permissions.
+- The modified local review API script passes all 29 checks, including actual
+  user-JWT permissions, concurrent opinions and the real restore RPC in a rolled-back
+  empty transaction. The modified coverage API script passes all 13 checks.
+- A single fresh-fixture local browser run passes coverage, complete export,
+  two-account failure/evidence/correction/retest and invitation activation/replay:
+  4 passed, with review intentionally skipped for that fixture file. The dedicated
+  review journey then passes separately on fresh review fixtures, including decoding
+  the v2 archive and checking the six retained opinions. Desktop/mobile screenshots
+  of both features were visually inspected; there is no document overflow.
+- The first cold invitation browser run exceeded its 20-second link wait. A later
+  reused coverage fixture also failed because the prior browser journey had advanced
+  its revision. Fresh fixtures and the bounded response-status check passed in the
+  final runs above. CONTRIBUTING now documents fixture consumption and sequential
+  browser runs. No application logic was changed to bypass either failure.
+- Existing hosted API/Storage acceptance passes all 11 checks against the unchanged
+  production schema, and the public HTTPS site returns 200. The destructive phase-1
+  integration/Auth reprovisioning/Storage restoration suite, npm audit and remote CI
+  were not rerun. Their earlier results remain historical.
+
+Retained private release evidence:
+
+- `backups/pre-p2-release-1792890709008/`: a PostgreSQL public/private/migration
+  snapshot and two complete format-1 project archives. Checksums, manifest shape
+  and evidence bytes passed decoding. The real ERP workspace has 10 cases and no
+  executions; the separate technical workspace has 10 cases, 2 executions and one
+  evidence file. These observations are not ERP acceptance.
+- The host's pg_dump 14 cannot dump PostgreSQL 17. The owned container's pg_dump 17
+  produced the hosted snapshot using a read-only operation; no local reset occurred.
+- `backups/p2-release-local-coverage-*.png`, `backups/p2-release-local-reviews-*.png`,
+  workflow screenshots and `backups/review-acceptance.zip` retain synthetic local
+  evidence. Files/fixtures remain ignored and private. These are local backups;
+  the existing separate-private-location backup requirement remains unresolved.
+- Private preparation scripts in `backups/prepare-p2-release.mjs` and
+  `backups/apply-p2-migrations.mjs` remain available for operator inspection. The
+  migration script checks archives and the exact four-version hosted ledger before
+  attempting all three files and ledger entries in one transaction. It was refused
+  before execution, so no success is claimed for it.
+
+Production release blocker: automatic approval review rejected the attempted
+hosted migration command. Its stated reason was that the user authorized project
+continuation and commits, but had not explicitly authorized this exact production
+schema change, which can affect shared service behavior. The rejected action was
+not retried or bypassed. No hosted schema, data, Auth configuration or frontend was
+changed. Explicit owner approval must precede applying migrations `202610250001`–
+`202610250003` and publishing coverage/reviews to the existing Pages site.
+
+Next action after that approval: refresh the verified project backups, inspect and
+apply the three existing additive migrations transactionally, run opted-in hosted
+review/coverage API acceptance, publish the validated frontend and run the HTTPS
+browser/export journeys. Record the new release only after checks pass. The online
+release remains source 891d37a at https://qa-workbench.pages.dev (deployment
+f485304d), with hosted migrations 1–4. P2-01 remains open; broader ERP coverage,
+P2-02 and phase 3 have not started in this session. The owned local stack and
+function are running; previous tmpfs, retained-volume and backup caveats remain.
