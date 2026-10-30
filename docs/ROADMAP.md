@@ -32,6 +32,10 @@ The local invitation runtime blocker was recovered on 2026-10-25. Release readin
 and isolated hosted acceptance commands are prepared; production migrations and
 frontend publication await explicit owner approval after automatic approval review
 refused the schema change. No new online release is claimed.
+On 2026-10-30, versioned read-only backup/SQL planning and rollback-only local
+migration acceptance were added and verified. Fresh hosted archives, the existing
+11 API/Storage access checks and the hosted browser export passed; the hosted
+schema/frontend remain unchanged. Explicit production approval is still pending.
 Broader ERP coverage remains open; this coordination feature requires no ERP case changes.
 P2-02 remains next after the P2-01 delivery/coverage milestone. Phase 3 has not
 started. Building this app does not complete

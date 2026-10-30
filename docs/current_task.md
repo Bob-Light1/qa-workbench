@@ -1,7 +1,9 @@
 # Current task and handoff
 
-Last updated: 2026-10-25.
-Status: PHASE 1 DELIVERED. P2-01 validated locally; production release awaits explicit approval.
+Last updated: 2026-10-30.
+Status: PHASE 1 DELIVERED. P2-01 validated locally; reproducible release preparation
+and rollback-only migration checks pass. Production release awaits the explicit
+approval requested in this session; no approval received at closeout.
 Phase 3 not started.
 
 ## Objective and released state
@@ -326,3 +328,67 @@ release remains source 891d37a at https://qa-workbench.pages.dev (deployment
 f485304d), with hosted migrations 1–4. P2-01 remains open; broader ERP coverage,
 P2-02 and phase 3 have not started in this session. The owned local stack and
 function are running; previous tmpfs, retained-volume and backup caveats remain.
+
+## P2-01 reproducible release preparation — 2026-10-30
+
+Objective: continue the next documented delivery step and commit completed work.
+Initial main was clean at 0f73000. Implementation commit:
+c956268. No subagents used. The earlier production approval refusal remains
+applicable: the current general continuation request did not explicitly approve
+the three production migrations. A targeted approval request was sent; no schema
+application or frontend publication was attempted while it remained unanswered.
+
+Changes:
+
+- Replaced reliance on untracked private operator scripts with versioned
+  `scripts/p2-release.mjs prepare|plan`. Both force read-only database sessions.
+  Preparation captures every current project and ready evidence, a PostgreSQL 17
+  application/ledger dump, source commit and artifact/migration SHA-256 hashes.
+- Planning checks the actual project inventory instead of assuming two archives,
+  rejects expired/future backups, verifies archives/evidence and dump integrity,
+  and detects changed migration files or hosted migration history. It writes
+  reviewable SQL without executing it. The SQL rechecks age, inventory and the
+  four-migration baseline under locks before all three migrations/ledger writes.
+- Added five focused unit checks and `npm run test:release:db`, also configured in
+  CI. The latter targets only the owned local container and rolls back every
+  migration rehearsal. Operations/contributor guidance documents prerequisites,
+  separate snapshot boundaries, private artifacts and the approval boundary.
+- No ERP source, case content, phase ordering or CH-* criteria changed. This
+  Workbench release-tooling work needs no manual ERP case revision.
+
+Checks actually executed:
+
+- Final 29 unit checks pass; TypeScript/production build, changed-file formatting,
+  Git diff checks, hosted frontend configuration and configured-secret asset scan
+  pass. The existing Vite advisory remains (510 kB minified JS, 150 kB gzip).
+- Removing only the backup-age guard in a temporary copy made its regression test
+  fail as expected. Temporary mutant files were removed; final unit checks pass.
+- Local PostgreSQL checks pass for migration replay denial, expired-backup denial,
+  changed-inventory denial and successful execution of all three migrations/ledger
+  inserts. RLS, grants and strict review notes were checked. Every rehearsal was
+  rolled back; review-row, function-definition and ledger fingerprints match the
+  original state. No stack reset, database restart or persistent local schema
+  change occurred. The existing seven-version local ledger was inspected.
+- The new preparation and planning commands succeeded against hosted QA using
+  read-only sessions. Private evidence is under
+  `backups/pre-p2-release-1793382007784/`: two complete archives, database.sql,
+  release.json and apply.sql. It contains the ERP project's ten cases/no executions
+  and the synthetic project's ten cases/two executions/one evidence file. Archives
+  were decoded and all evidence checksums passed. These are separate snapshots,
+  not an installation-wide point-in-time backup or ERP acceptance.
+- All 11 existing hosted API/Storage allow/deny checks pass. HTTPS returns 200 with
+  the existing security headers. The actual hosted browser export journey passes
+  and decodes its complete archive. Coverage/reviews are still absent from the
+  hosted schema/frontend, so no hosted acceptance for those features is claimed.
+- Full phase-1 destructive restore, invitation activation, coverage/review API and
+  browser journeys, npm audit and remote CI were not rerun. Their earlier results
+  above remain historical. The local Edge Function container was absent on this
+  session's inspection; it was not needed or started for these release-tool checks.
+
+Next action: obtain the pending explicit approval for migrations 202610250001–003
+and Pages publication; refresh the private backup/plan, inspect/apply the SQL and
+run hosted coverage/review and HTTPS acceptance before declaring delivery. Backups
+here are local/private; the separate off-machine-copy requirement remains open.
+The retained-volume/tmpfs caveats still apply. P2-01 remains IN PROGRESS; broader
+ERP coverage, P2-02 and phase 3 remain open. Production is unchanged: source
+891d37a at https://qa-workbench.pages.dev, deployment f485304d, migrations 1–4.
