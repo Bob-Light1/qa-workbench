@@ -6,8 +6,10 @@ Frontend c305e01, deployment 218a2d56, hosted migrations 1–7. All five HTTPS b
 journeys pass across two dedicated fixture runs. Broader ERP coverage remains open.
 P2-02 bulk assignment and twenty-account API collaboration VERIFIED LOCALLY at
 25bf7f3; NOT RELEASED. Phase 3 not started.
-P2-02 release preparation tooling and hosted acceptance opt-in are now locally
-verified; fresh hosted backup/plan preparation is the current next action.
+P2-02 release preparation tooling and hosted acceptance opt-in are locally
+verified at 207eba8. Fresh hosted backup/plan preparation was rejected by automatic
+approval review pending explicit authorization for its sensitive payload/destination.
+No new hosted backup, production migration or Pages publication occurred.
 
 ## Objective and released state
 
@@ -617,3 +619,40 @@ acceptance. The separate private off-machine backup copy remains outstanding.
 Production stays source c305e01, deployment 218a2d56 at
 https://qa-workbench.pages.dev, with hosted migrations 1–7. Broader ERP coverage,
 P2-02 online delivery and phase 3 remain open.
+
+## P2-02 release preparation closeout — 2026-10-30
+
+Verified tooling commit: `207eba8` (guarded seven-to-eight release and hosted
+acceptance opt-in). All 36 unit checks pass again after the temporary mutation
+experiment. The exact hosted target, publishable frontend configuration and a
+configured-private-value scan of built assets pass. No configured server secret
+or operator email was found in those assets. Earlier checks in the preceding
+milestone were executed in this session; no new hosted acceptance is claimed.
+
+The attempted `collaboration-release.mjs prepare` command was rejected by
+automatic approval review before process creation. Its stated reason: exporting
+hosted project data, evidence files and a database dump into local backup files
+requires trusted user authorization specifying the sensitive payload and destination,
+even though database sessions are read-only. No workaround or alternate hosted
+export was attempted. The repository remains private and the production release
+is unchanged. No new backup directory, release report or SQL plan was created.
+
+Required next authorization: copy all projects in the owned hosted QA Supabase
+installation, their ready evidence and a public/private/migration-schema database
+dump into ignored private `backups/pre-collaboration-release-TIMESTAMP/` directories
+in this repository (directory mode 700, file mode 600). The payload can contain
+project contact information, test content and private evidence; it must remain
+private. After authorization, run `prepare` and `plan`, inspect the generated SQL
+and refresh it if older than one hour. Production application of migration
+`202610300001` and publication to the existing Pages project still require the
+explicit release approval recorded as pending in the prior handoff.
+
+Once approved, compare pre/post-migration historical exports, run hosted
+collaboration and existing access checks, publish and verify HTTPS browser behavior,
+then record deployment/source and verified post-release archives. The separate
+private off-machine backup copy remains outstanding; no destination was supplied.
+Retained-volume/tmpfs caveats and earlier restoration evidence remain applicable.
+No ERP case revision is needed for this Workbench tooling. P2-02 remains IN PROGRESS;
+production stays source c305e01, deployment 218a2d56 at
+https://qa-workbench.pages.dev (direct URL:
+https://218a2d56.qa-workbench.pages.dev), with hosted migrations 1–7.

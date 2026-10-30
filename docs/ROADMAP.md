@@ -69,3 +69,9 @@ three-session browser journey with desktop/mobile inspection, 36 unit checks,
 TypeScript/build and a zero-vulnerability npm audit. Production migration,
 publication and hosted collaboration acceptance remain pending; these tooling
 checks do not establish online P2-02 delivery. No ERP case changes are needed.
+Tooling commit: `207eba8`. The attempted read-only hosted backup was rejected
+before execution by automatic approval review, which requires explicit permission
+for copying all project data, evidence and the database dump into private ignored
+local backup directories. No fresh hosted archive/plan was created. This approval
+and the pending production migration/publication approval are the next action;
+the deployed P2-01 source, URL and seven-version schema remain unchanged.
