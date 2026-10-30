@@ -1,9 +1,9 @@
 # Current task and handoff
 
 Last updated: 2026-10-30.
-Status: PHASE 1 DELIVERED. P2-01 validated locally; reproducible release preparation
-and rollback-only migration checks pass. Production release awaits the explicit
-approval requested in this session; no approval received at closeout.
+Status: PHASE 1 DELIVERED. P2-01 production release authorized on 2026-10-30.
+Production migrations 1–7 applied; original project history verified unchanged.
+Hosted feature API acceptance passed; frontend publication/browser acceptance pending.
 Phase 3 not started.
 
 ## Objective and released state
@@ -13,7 +13,7 @@ Source repository: /home/adminsecu/Projects/qa-workbench, branch main, private l
 Git repository. Application release: 891d37a35b0c51b9c9fed5874d7c0d812638068a;
 Cloudflare production deployment f485304d. Final documentation/test evidence may
 have later commits without changing the deployed application. Supabase Free project
-xtgaepikylepriipuyps, region eu-west-3; migrations 1–4 and manage-access deployed.
+xtgaepikylepriipuyps, region eu-west-3; migrations 1–7 and manage-access deployed.
 
 The ERP multi-campus project has ten French starter cases. Separate synthetic
 acceptance data verifies the Workbench itself; it does not establish ERP acceptance.
@@ -392,3 +392,22 @@ here are local/private; the separate off-machine-copy requirement remains open.
 The retained-volume/tmpfs caveats still apply. P2-01 remains IN PROGRESS; broader
 ERP coverage, P2-02 and phase 3 remain open. Production is unchanged: source
 891d37a at https://qa-workbench.pages.dev, deployment f485304d, migrations 1–4.
+
+## P2-01 authorized production release — 2026-10-30 (in progress)
+
+The owner explicitly approved refreshed private backups, production migrations
+202610250001–202610250003, Pages publication and hosted acceptance. Initial main
+was clean at 46f62ae. No subagents used. This supersedes the earlier approval blocker.
+
+Refreshed and verified `backups/pre-p2-release-1793390592190/` with both project
+archives, ready evidence, database dump, hashes and SQL plan. All 29 unit checks,
+TypeScript/production build and configured-secret asset scan passed. Applied only
+the three approved migrations and ledger entries in one guarded transaction using
+the private `backups/apply-approved-p2.mjs` operator wrapper. Actual hosted ledger
+now contains versions 1–7. Compared all 12 exported tables of both original projects
+against their archives: historical rows are unchanged. Hosted coverage API acceptance
+passes all 13 checks; hosted review API acceptance passes all 28 checks, including
+actual JWT allow/deny paths, concurrent/stale opinions and v2 archive decoding.
+Hosted reset/restore is excluded. Both created separate synthetic workspaces and
+private browser fixtures. Frontend still uses the previous deployment. Next:
+publish the exact validated frontend and verify HTTPS browser flows.
