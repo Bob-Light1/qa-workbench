@@ -105,22 +105,24 @@ append-only: use an additive repair migration instead of deleting applied histor
 Back up first. Avoid destructive schema changes that invalidate the previous frontend.
 If a failed release applied migrations, inspect actual migration state before retrying.
 
-## Pending P2-01 release
+## P2-01 release procedure
 
-The current hosted schema has migrations `202610220001`–`202610220004`. Coverage
-and reviews require these existing additive migrations, in this order:
+The hosted release on 2026-10-30 applied these additive migrations after
+`202610220001`–`202610220004`, in this order:
 
 1. `202610250001_case_reviews.sql`: review table/RLS/RPC and archive/restore support.
 2. `202610250002_review_notes.sql`: reject whitespace-only requested changes.
 3. `202610250003_review_history_restore.sql`: retain earlier opinions on restore.
 
-Obtain explicit owner approval for this production schema change and frontend
-deployment. Automatic approval review refused the migration action during the
-2026-10-25 release preparation; no migration was applied. The files have already
-passed local API, concurrency, permission and rolled-back restore checks. They add
-review history without rewriting existing cases, executions or campaign snapshots.
+The owner explicitly approved the production schema change and publication on
+2026-10-30, superseding the earlier automatic approval refusal. All seven migrations
+are now applied; do not replay these files on the current installation. Frontend
+source `c305e01` is published as deployment `218a2d56`. Hosted API, concurrency,
+permission, history/export and all five HTTPS browser journeys passed. Original
+project rows were compared unchanged after migration. Local rolled-back restore
+checks remain recorded separately; no hosted reset/restore was performed.
 
-After approval, refresh and verify private archives of every existing project and
+For an installation still at the four-migration baseline, refresh and verify private archives of every existing project and
 its evidence. Apply all three files and their migration ledger entries atomically,
 then inspect the actual ledger. Keep the previous frontend available until hosted
 API checks pass. Run the opted-in hosted coverage/review acceptance documented in
@@ -132,9 +134,11 @@ Record the new source commit and deployment identifier only after these checks.
 If a check fails, retain its real error and inspect state before retrying. Use an
 additive repair migration or the prior compatible frontend as appropriate.
 
-The versioned preparation tool replaces the earlier private scripts under
+The baseline-specific versioned preparation tool replaces the earlier private scripts under
 `backups/`. Both commands below use read-only PostgreSQL sessions and download
-Storage objects; neither applies SQL, generates recovery links nor publishes assets:
+Storage objects; neither applies SQL, generates recovery links nor publishes assets.
+They intentionally reject the current seven-migration hosted installation. Use
+ordinary UI/CLI backups for that installation. The historical baseline commands are:
 
 ```sh
 node --env-file=.env.hosted.local scripts/p2-release.mjs prepare
@@ -204,15 +208,16 @@ node scripts/local-env.mjs
 All required API/Auth/Storage/function health checks remain enabled. Integration
 resets are restricted to this named validation stack and its loopback API.
 
-## Initial deployment inventory
+## Current deployment inventory
 
 - Canonical HTTPS origin: https://qa-workbench.pages.dev
 - Cloudflare Pages direct-upload project: `qa-workbench`; production branch `main`.
-- Verified application code: `891d37a35b0c51b9c9fed5874d7c0d812638068a`.
-- Production deployment: `f485304d` (https://f485304d.qa-workbench.pages.dev).
+- Verified frontend source: `c305e0168ef76b0ae3dca94c108a43c4898e09a1`.
+- Production deployment: `218a2d56` (https://218a2d56.qa-workbench.pages.dev).
 - Supabase Free project: `xtgaepikylepriipuyps`, region `eu-west-3`,
   [provider dashboard](https://supabase.com/dashboard/project/xtgaepikylepriipuyps).
-- Migrations: `202610220001` through `202610220004`; Edge Function: `manage-access`.
+- Migrations: `202610220001` through `202610220004` and `202610250001` through
+  `202610250003`; Edge Function: `manage-access`.
 - Private host environment on the initial machine: `.env.hosted.local` (server),
   `.env.production.local` (frontend publishable configuration). Never display their
   contents in logs. `.env.admin-access.local` is a temporary one-use access link,
@@ -225,8 +230,9 @@ resets are restricted to this named validation stack and its loopback API.
 For frontend rollback, use the Cloudflare Pages dashboard to select a previous
 production deployment and roll it back; see [provider procedure](https://developers.cloudflare.com/pages/configuration/rollbacks/).
 Preserve schema compatibility and keep a current export before any migration.
-The initial `1d8c11e5` deployment predates the project-loading repair; prefer a
-verified release when another is available. Applied migrations remain append-only.
+The previous phase-1 deployment `f485304d` remains a frontend fallback. It omits
+coverage/reviews; prefer the current verified release. The initial `1d8c11e5`
+deployment predates the project-loading repair. Applied migrations remain append-only.
 
 Backups produced during acceptance live in the ignored `backups/` directory and
 are private local copies. Copy a verified archive to a separate private location;

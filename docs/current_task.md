@@ -1,18 +1,18 @@
 # Current task and handoff
 
 Last updated: 2026-10-30.
-Status: PHASE 1 DELIVERED. P2-01 production release authorized on 2026-10-30.
-Production migrations 1–7 applied; original project history verified unchanged.
-Hosted feature API acceptance passed; frontend publication/browser acceptance pending.
+Status: PHASE 1 DELIVERED. P2-01 coverage/review increment RELEASED AND VERIFIED.
+Frontend c305e01, deployment 218a2d56, hosted migrations 1–7. All five HTTPS browser
+journeys pass across two dedicated fixture runs. Broader ERP coverage remains open.
 Phase 3 not started.
 
 ## Objective and released state
 
 The approved standalone QA Workbench is online at https://qa-workbench.pages.dev.
 Source repository: /home/adminsecu/Projects/qa-workbench, branch main, private local
-Git repository. Application release: 891d37a35b0c51b9c9fed5874d7c0d812638068a;
-Cloudflare production deployment f485304d. Final documentation/test evidence may
-have later commits without changing the deployed application. Supabase Free project
+Git repository. Published frontend source: c305e0168ef76b0ae3dca94c108a43c4898e09a1;
+Cloudflare production deployment 218a2d56. Later documentation/tooling maintenance
+commits do not change the verified published assets. Supabase Free project
 xtgaepikylepriipuyps, region eu-west-3; migrations 1–7 and manage-access deployed.
 
 The ERP multi-campus project has ten French starter cases. Separate synthetic
@@ -393,21 +393,75 @@ The retained-volume/tmpfs caveats still apply. P2-01 remains IN PROGRESS; broade
 ERP coverage, P2-02 and phase 3 remain open. Production is unchanged: source
 891d37a at https://qa-workbench.pages.dev, deployment f485304d, migrations 1–4.
 
-## P2-01 authorized production release — 2026-10-30 (in progress)
+## P2-01 authorized production release closeout — 2026-10-30
 
 The owner explicitly approved refreshed private backups, production migrations
 202610250001–202610250003, Pages publication and hosted acceptance. Initial main
 was clean at 46f62ae. No subagents used. This supersedes the earlier approval blocker.
 
-Refreshed and verified `backups/pre-p2-release-1793390592190/` with both project
-archives, ready evidence, database dump, hashes and SQL plan. All 29 unit checks,
-TypeScript/production build and configured-secret asset scan passed. Applied only
-the three approved migrations and ledger entries in one guarded transaction using
-the private `backups/apply-approved-p2.mjs` operator wrapper. Actual hosted ledger
-now contains versions 1–7. Compared all 12 exported tables of both original projects
-against their archives: historical rows are unchanged. Hosted coverage API acceptance
-passes all 13 checks; hosted review API acceptance passes all 28 checks, including
-actual JWT allow/deny paths, concurrent/stale opinions and v2 archive decoding.
-Hosted reset/restore is excluded. Both created separate synthetic workspaces and
-private browser fixtures. Frontend still uses the previous deployment. Next:
-publish the exact validated frontend and verify HTTPS browser flows.
+Released state and preservation:
+
+- Refreshed and verified `backups/pre-p2-release-1793390592190/` with both original
+  project archives, ready evidence, PostgreSQL 17 dump, hashes and guarded SQL plan.
+  Applied only the three approved migrations and ledger entries in one transaction
+  through private `backups/apply-approved-p2.mjs`. Actual hosted ledger contains
+  versions 1–7. Compared all 12 exported tables of both original projects against
+  their pre-migration archives: every historical row is unchanged.
+- Published frontend source c305e0168ef76b0ae3dca94c108a43c4898e09a1 to the existing
+  Pages project/main branch, deployment 218a2d56. Canonical origin:
+  https://qa-workbench.pages.dev; deployment URL:
+  https://218a2d56.qa-workbench.pages.dev. The prior f485304d frontend remains the
+  phase-1 fallback. No Auth configuration or Edge Function deployment changed.
+- Hosted acceptance added only separate synthetic coverage/review projects and
+  identities. The real ERP project still has its original ten-case catalog;
+  optional ERP-011–013 were imported only in the coverage acceptance project.
+  No ERP source, case content, phase ordering or CH-* criteria changed. This
+  Workbench release needs no manual ERP case revision and establishes no ERP verdict.
+
+Checks actually executed:
+
+- All 13 hosted coverage API checks and all 28 hosted review API checks pass using
+  actual JWTs, including RLS/grants, anonymous/tester/outsider denial, withdrawn
+  membership, simultaneous opinions, stale revisions, immutable history and v2
+  export. Hosted reset/restore is explicitly excluded. All 11 original hosted
+  Auth/API/Storage permission/evidence checks pass after migration.
+- Canonical HTTPS browser run with fresh coverage fixtures: 4 passed in one run
+  (coverage, complete archive with evidence, two-account failure/correction/retest,
+  invitation activation/weak-password/link-replay refusal). The subsequent dedicated
+  review browser run: 1 passed (stale review/edit invalidation, failed request with
+  no false success, authors/history, tester read-only access and six-opinion v2 ZIP).
+  Desktop/mobile coverage and review screenshots were visually inspected; no
+  document overflow. Browser suites ran sequentially and invitation links were not
+  logged or captured. All five journeys passed across these two runs.
+- HTTPS returns 200 with the existing CSP/no-referrer/framing-denial headers.
+  Downloaded JS/CSS match the validated local build byte for byte. Hosted target,
+  publishable configuration and configured-secret asset scans passed. Private
+  `published-assets.json` retains source/deployment identifiers and asset hashes.
+- After browser acceptance, ordinary admin-JWT exports were saved and decoded as
+  format 2: `backups/p2-hosted-218a2d56-coverage.zip` (16 cases, 2 evidence files)
+  and `backups/p2-hosted-218a2d56-review.zip` (1 case, all 6 review opinions including
+  the final v5 approval). Checksums and evidence pass. Screenshots are retained as
+  `backups/p2-hosted-218a2d56-*.png`; fixtures remain private/ignored.
+- The release audit initially found 3 vulnerabilities through Wrangler's
+  Miniflare/Undici development dependencies. Targeted `npm update wrangler` changed
+  only that toolchain: Wrangler 4.151.3 → 4.156.0, Miniflare
+  5.20261019.1-beta → 5.20261023.3-beta, Undici 7.29.1 → 7.30.1 and Workerd binaries.
+  Fix committed as e8ef298. Final `npm audit --audit-level=moderate`: 0
+  vulnerabilities. Final 29 unit checks, TypeScript/build and the updated CLI's
+  authenticated read-only Pages project check pass. Rebuilt assets match the
+  already verified publication, so no second deployment was needed. See the
+  [upstream Undici advisory](https://github.com/nodejs/undici/security/advisories/GHSA-4w7w-5xrc-9h26)
+  and [Wrangler release](https://github.com/cloudflare/workers-sdk/releases/tag/wrangler%404.156.0).
+  Npm noted unapproved install scripts for esbuild/workerd; no new script approvals
+  were added. The build and required Pages CLI operation work without them.
+- No local database reset/restart or destructive phase-1 Auth/Storage restoration
+  rerun occurred. Earlier local restore/rollback acceptance remains historical.
+  No remote CI execution is claimed. Vite retains its advisory 510 kB JS chunk
+  warning (150 kB gzip); it does not fail the build.
+
+Next action: P2-02 twenty-account collaboration and bulk-work design/acceptance is
+the next engineering increment after this delivered milestone; broader ERP case
+coverage remains open under P2-01. Keep the real ten-case workspace distinct from
+synthetic acceptance data. Portable backups are verified local/private copies;
+their separate off-machine copy remains outstanding. Retained-volume/tmpfs and
+local Edge Function caveats above remain applicable. Phase 3 has not started.

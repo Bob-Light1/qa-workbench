@@ -7,10 +7,12 @@ user cap is implemented.
 
 ## Delivery status
 
-The phase-1 application is available at **https://qa-workbench.pages.dev**.
-HTTPS two-account workflows, invitations, private evidence and hosted API access
-checks have passed. Portable restoration has been exercised against an empty local
-installation. Initial source release: `891d37a`; production deployment: `f485304d`.
+The application is available at **https://qa-workbench.pages.dev**, including
+revision-aware roadmap coverage and case reviews released on 2026-10-30.
+Hosted coverage/review permissions, HTTPS two-account workflows, invitations,
+private evidence and complete archive exports have passed. Portable restoration
+has been exercised against an empty local installation. Published frontend source:
+`c305e01`; production deployment: `218a2d56`; hosted migrations: 1–7.
 The authoritative work status is [the roadmap](docs/ROADMAP.md); the latest executed
 checks and next action are in [the handoff](docs/current_task.md).
 

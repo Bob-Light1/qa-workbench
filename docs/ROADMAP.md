@@ -17,26 +17,30 @@ Dates and executed evidence live in [current handoff](current_task.md).
 | P3-01 | Automated result ingestion and impact checks   | NOT STARTED | Provenance and history preserved                              |
 | P3-02 | Scheduled backups and useful reporting         | NOT STARTED | Recovery exercised and indicators actionable                  |
 
-Phase 1 is delivered: P1-07 passes on the verified HTTPS deployment. The first
-bounded P2-01 increment is implemented and validated locally: revision-aware
-roadmap coverage by campaign and the optional ERP-011–ERP-013 catalog in
-data/erp-cases-phase2.json. It is not deployed. ERP-001–ERP-010 remain
-unchanged. New cases cover direct cross-campus navigation, student/admin role
-separation and hidden-module navigation, linked to existing ERP phase-1-B rows 2/3
-and the CH-2 manual complement. No ERP roadmap ordering or acceptance boundary
-changes. Revision-bound case reviews are also implemented and validated locally:
-admin/editor opinions, immutable author/revision history, stale/concurrent-write
-refusal, tester reads and portable archive format 2 with format-1 compatibility.
-These two increments still require a hosted release and hosted acceptance.
-The local invitation runtime blocker was recovered on 2026-10-25. Release readiness
-and isolated hosted acceptance commands are prepared; production migrations and
-frontend publication await explicit owner approval after automatic approval review
-refused the schema change. No new online release is claimed.
-On 2026-10-30, versioned read-only backup/SQL planning and rollback-only local
-migration acceptance were added and verified. Fresh hosted archives, the existing
-11 API/Storage access checks and the hosted browser export passed; the hosted
-schema/frontend remain unchanged. Explicit production approval is still pending.
-Broader ERP coverage remains open; this coordination feature requires no ERP case changes.
-P2-02 remains next after the P2-01 delivery/coverage milestone. Phase 3 has not
-started. Building this app does not complete
-ERP CH-0 acceptance, CH-2, CH-4 or other existing QA work items.
+Phase 1 is delivered. The bounded P2-01 coverage/review increments are now also
+released at https://qa-workbench.pages.dev: frontend source `c305e01`, deployment
+`218a2d56`, hosted migrations 1–7. On 2026-10-30 the owner explicitly authorized
+the production migration/publication, superseding the earlier approval blocker.
+Fresh verified backups preceded atomic migration; all original project history
+was compared unchanged. Hosted acceptance passes 13 coverage, 28 review and 11
+existing API/Storage checks, plus all five HTTPS browser journeys across the two
+dedicated fixture runs. Desktop/mobile views and v2 archives were inspected.
+
+Coverage groups current case revisions by roadmap reference/campaign and preserves
+historical context. Case reviews retain author/revision history, refuse stale or
+concurrent overwrites, allow tester reads and export in archive format 2 with
+format-1 compatibility. Versioned read-only backup/SQL planning and local
+rollback-only migration checks make this release procedure reproducible.
+
+The optional ERP-011–ERP-013 catalog remains in data/erp-cases-phase2.json. These
+cases cover direct cross-campus navigation, student/admin role separation and
+hidden-module navigation, linked to existing ERP phase-1-B rows 2/3 and the CH-2
+manual complement. ERP-001–ERP-010 and the real ERP workspace's ten-case catalog
+were preserved; acceptance imported the optional catalog only in a synthetic
+workspace. No ERP source, roadmap ordering, CH-* criteria or manual case content
+changed during this Workbench release.
+
+P2-01 remains IN PROGRESS for broader ERP coverage; its coverage/review delivery
+milestone is complete. P2-02 twenty-account collaboration/bulk work is the next
+engineering increment after this milestone. Phase 3 has not started. Workbench
+acceptance does not establish ERP CH-0, CH-2, CH-4 or other business acceptance.
