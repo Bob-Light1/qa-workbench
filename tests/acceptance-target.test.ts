@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { acceptanceTarget } from "../scripts/acceptance-target.mjs";
+import { spawnSync } from "node:child_process";
 
 const local = 'project_id = "qa-workbench-validation"';
 const hosted = "https://xtgaepikylepriipuyps.supabase.co";
@@ -32,5 +33,27 @@ describe("Additive acceptance target guard", () => {
       expect(() => acceptanceTarget(url, true, local)).toThrow(
         "No fixtures created",
       );
+  });
+  it("refuses unsafe collaboration CLI targets and options before provisioning accounts", () => {
+    for (const [args, url, message] of [
+      [[], hosted, "No fixtures created"],
+      [["--hosted"], "http://127.0.0.1:55321", "No fixtures created"],
+      [["--hosted"], "https://other.supabase.co", "No fixtures created"],
+      [["--hostedd"], hosted, "Usage:"],
+      [["--hosted", "--hosted"], hosted, "Usage:"],
+    ] as const) {
+      const result = spawnSync(
+        process.execPath,
+        ["scripts/collaboration-check.mjs", ...args],
+        {
+          env: { ...process.env, SUPABASE_URL: url },
+          encoding: "utf8",
+          timeout: 10000,
+        },
+      );
+      expect(result.status).not.toBe(0);
+      expect(result.stderr).toContain(message);
+      expect(result.stdout).not.toContain("PASS");
+    }
   });
 });

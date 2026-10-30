@@ -57,3 +57,15 @@ build and rollback-only release SQL checks pass. CI is configured, without a
 claimed remote run. Production remains the verified P2-01 release above; hosted
 migration/publication and acceptance are the next delivery step. No ERP source,
 case content or CH-* acceptance changes are required for this coordination feature.
+
+P2-02 release preparation (2026-10-30): the dedicated seven-to-eight entry point
+is implemented, sharing the historical release safeguards while requiring
+format-2 archives with review history. Both migration plans pass local
+rollback-only rehearsal; the new plan refuses replay, expired/future backups and
+changed inventories, preserving all local fingerprints. Hosted collaboration
+acceptance is available behind an explicit flag/exact-target guard, with separate
+private fixtures. Local acceptance reran successfully: 47 API checks, the
+three-session browser journey with desktop/mobile inspection, 36 unit checks,
+TypeScript/build and a zero-vulnerability npm audit. Production migration,
+publication and hosted collaboration acceptance remain pending; these tooling
+checks do not establish online P2-02 delivery. No ERP case changes are needed.

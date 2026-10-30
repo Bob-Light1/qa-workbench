@@ -5,14 +5,16 @@ import { createClient } from "@supabase/supabase-js";
 import { acceptanceTarget } from "./acceptance-target.mjs";
 import { client, call } from "./client.mjs";
 
-// No hosted mode: this new increment has not been authorized for production.
-acceptanceTarget(
+const args = process.argv.slice(2);
+if (!(args.length === 0 || (args.length === 1 && args[0] === "--hosted")))
+  throw new Error(
+    "Usage: collaboration-check.mjs [--hosted]. No fixtures created.",
+  );
+const target = acceptanceTarget(
   process.env.SUPABASE_URL,
-  false,
+  args[0] === "--hosted",
   await readFile("supabase/config.toml", "utf8"),
 );
-if (process.argv.length > 2)
-  throw new Error("Collaboration acceptance has no command-line options.");
 const service = client(true);
 const password = crypto.randomUUID() + "aA1!";
 const suffix = crypto.randomUUID();
@@ -498,9 +500,10 @@ check(
 );
 await mkdir("backups", { recursive: true });
 await writeFile(
-  "backups/collaboration-acceptance.json",
+  `backups/collaboration${target.suffix}-acceptance.json`,
   JSON.stringify(
     {
+      target: process.env.SUPABASE_URL,
       checked_at: new Date().toISOString(),
       checks,
       identities: 20,
@@ -512,7 +515,7 @@ await writeFile(
   { mode: 0o600 },
 );
 await writeFile(
-  ".env.collaboration.browser",
+  `.env.collaboration${target.suffix}.browser`,
   JSON.stringify({
     email: owner.email,
     editorEmail: editor.email,
@@ -527,5 +530,5 @@ await writeFile(
   { mode: 0o600 },
 );
 console.log(
-  `Local collaboration acceptance: ${checks.length} checks passed. Private browser fixtures saved.`,
+  `${target.label} collaboration acceptance: ${checks.length} checks passed. Private browser fixtures saved.`,
 );

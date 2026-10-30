@@ -129,7 +129,9 @@ is accepted. `.env.coverage.hosted.browser`, `.env.review.hosted.browser` and
 after a fresh verified backup and compatible migrations. Never run
 `test:integration` or reset/restore operations against hosted data.
 
-Release preparation is tracked in `scripts/p2-release.mjs`; see OPERATIONS.md.
+Release preparation has fixed entry points in `scripts/p2-release.mjs` (historical
+four-to-seven) and `scripts/collaboration-release.mjs` (seven-to-eight), sharing
+`scripts/release-tool.mjs`; see OPERATIONS.md.
 Unit checks exercise stale backups, the complete live project inventory, migration
 source changes and archive/snapshot corruption. `npm run test:release:db` checks
 the generated SQL against only the owned local validation container. It refuses
@@ -137,13 +139,18 @@ replay against the complete tracked migration ledger, expired backups and change
 inventories, then recreates the four-version ledger/review-table
 baseline inside a rolled-back transaction, executes the three pending migrations
 and ledger writes, and verifies RLS/grants and unchanged review/function/ledger
-fingerprints afterwards. It never commits or contacts hosted services.
+fingerprints afterwards. `npm run test:release:collaboration:db` rehearses the
+seven-to-eight plan by removing only the bulk function and later ledger entries
+inside a rolled-back transaction. It verifies the new RPC's grants, definer and
+fixed search path, existing review/restore access, and unchanged reviews,
+campaign snapshots, executions, functions and complete ledger. Both commands
+also reject future-dated backups. Neither commits or contacts hosted services.
 
 ## Twenty-account collaboration acceptance
 
 `npm run test:collaboration:api` adds a dedicated synthetic project, twenty member
-identities and one outsider to the owned local stack. It has no hosted mode and
-never resets data. Service credentials only provision fixtures; all business
+identities and one outsider to the owned local stack. It never resets data.
+Service credentials only provision fixtures; all business
 operations and allow/deny assertions use real user JWTs. It verifies malformed
 and mixed-project/campaign selections, role/target withdrawal, whole-batch rollback,
 twenty overlapping bulk writes, single/bulk collisions, twenty independent concurrent
@@ -165,3 +172,19 @@ Private `.env.collaboration.browser` and `backups/collaboration-acceptance.json`
 remain ignored. CI includes these commands; no remote CI run is implied. Apply
 migration `202610300001_bulk_assignments.sql` locally before the new acceptance.
 The online P2-01 release does not yet contain this migration or interface.
+
+For an authorized release after the migration and fresh verified backups, opt in
+to additive hosted acceptance using the exact existing QA target:
+
+```sh
+node --env-file=.env.hosted.local scripts/collaboration-check.mjs --hosted
+QA_BROWSER_URL=https://qa-workbench.pages.dev QA_BROWSER_ACCOUNTS=.env.collaboration.hosted.browser npx playwright test tests/browser/collaboration.spec.ts
+```
+
+The hosted flag and URL are checked before any fixture is provisioned; unknown
+or repeated flags are refused. The same 47 API assertions use twenty members
+and an outsider in separate synthetic projects, without resets or restoration.
+Private `.env.collaboration.hosted.browser` and
+`backups/collaboration.hosted-acceptance.json` are separate from local fixtures.
+Generate new API fixtures before repeating the browser journey. This mode is
+prepared for the next release; adding it does not establish hosted acceptance.

@@ -3,14 +3,10 @@ import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { encodeBackup, tableNames } from "../src/backup";
-import {
-  baseline,
-  digest,
-  migrationTransaction,
-  migrations,
-  target,
-  verifyReleaseBackup,
-} from "../scripts/p2-release.mjs";
+import * as reviews from "../scripts/p2-release.mjs";
+import * as collaboration from "../scripts/collaboration-release.mjs";
+import { decodeBackup } from "../src/backup";
+const { digest, target } = reviews;
 
 const directories: string[] = [];
 afterEach(async () => {
@@ -19,7 +15,8 @@ afterEach(async () => {
   );
 });
 const now = Date.parse("2026-10-30T12:00:00Z");
-async function fixture() {
+async function fixture(release: typeof reviews, archiveVersion: 1 | 2) {
+  const { baseline, migrations } = release;
   const directory = await mkdtemp(join(tmpdir(), "qa-release-"));
   directories.push(directory);
   const sources = await Promise.all(
@@ -35,11 +32,14 @@ async function fixture() {
       tableNames.map((t) => [t, [] as Record<string, unknown>[]]),
     );
     tables.projects = [{ id }];
+    tables.case_reviews = [
+      { id: "opinion", case_version: 3, notes: "Historical opinion" },
+    ];
     tables.attachments = [{ id: "capture", state: "ready", bytes: 3 }];
     const bytes = await encodeBackup(
       {
         format: "qa-workbench",
-        version: 1,
+        version: archiveVersion,
         project_id: id,
         exported_at: new Date(now).toISOString(),
         tables,
@@ -68,12 +68,25 @@ async function fixture() {
   return { directory, report, live, sources, save };
 }
 
-describe("P2 release safeguards", () => {
+describe.each([
+  { name: "review", release: reviews, archiveVersion: 1 as const },
+  { name: "collaboration", release: collaboration, archiveVersion: 2 as const },
+])("$name release safeguards", ({ release, archiveVersion }) => {
+  const { baseline, migrations, verifyReleaseBackup, migrationTransaction } =
+    release;
   it("verifies fresh backups and evidence for every project, without a fixed count", async () => {
-    const f = await fixture();
+    const f = await fixture(release, archiveVersion);
     expect(
       (await verifyReleaseBackup(f.directory, f.live, f.sources, now)).projects,
     ).toHaveLength(3);
+    const { bundle } = await decodeBackup(
+      new Uint8Array(
+        await readFile(`${f.directory}/${f.report.projects[0].id}.zip`),
+      ),
+    );
+    expect(bundle.tables.case_reviews).toEqual([
+      { id: "opinion", case_version: 3, notes: "Historical opinion" },
+    ]);
     for (const projects of [
       f.live.projects.slice(1),
       [...f.live.projects, { id: "new-project" }],
@@ -93,7 +106,7 @@ describe("P2 release safeguards", () => {
     ).rejects.toThrow("inventory");
   });
   it("refuses stale/future backups and another target", async () => {
-    const f = await fixture();
+    const f = await fixture(release, archiveVersion);
     for (const timestamp of [now - 3600000, now + 1, NaN]) {
       f.report.started_at = Number.isNaN(timestamp)
         ? "invalid"
@@ -111,7 +124,7 @@ describe("P2 release safeguards", () => {
     ).rejects.toThrow("target QA");
   });
   it("detects changed migration state and source files before generating SQL", async () => {
-    const f = await fixture();
+    const f = await fixture(release, archiveVersion);
     await expect(
       verifyReleaseBackup(
         f.directory,
@@ -124,13 +137,15 @@ describe("P2 release safeguards", () => {
       verifyReleaseBackup(
         f.directory,
         f.live,
-        [...f.sources.slice(0, 2), "changed SQL"],
+        f.sources.map((source: string, index: number) =>
+          index === 0 ? "changed SQL" : source,
+        ),
         now,
       ),
     ).rejects.toThrow("sources changed");
   });
   it("detects modified SQL snapshots and project archives", async () => {
-    const f = await fixture();
+    const f = await fixture(release, archiveVersion);
     await writeFile(`${f.directory}/database.sql`, "corrupted snapshot");
     await expect(
       verifyReleaseBackup(f.directory, f.live, f.sources, now),
@@ -148,7 +163,7 @@ describe("P2 release safeguards", () => {
     ).rejects.toThrow("archive checksum");
   });
   it("produces one atomic transaction with a locked baseline recheck", async () => {
-    const f = await fixture();
+    const f = await fixture(release, archiveVersion);
     const sql = migrationTransaction(f.sources, f.report);
     expect(sql.startsWith("begin;\n")).toBe(true);
     expect(sql.endsWith("commit;\n")).toBe(true);
@@ -156,14 +171,33 @@ describe("P2 release safeguards", () => {
       sql.indexOf("UNEXPECTED_MIGRATION_HISTORY"),
     );
     expect(sql.indexOf("UNEXPECTED_MIGRATION_HISTORY")).toBeLessThan(
-      sql.indexOf("create table public.case_reviews"),
+      sql.indexOf(f.sources[0]),
     );
     expect(
       sql.match(/insert into supabase_migrations.schema_migrations/g),
-    ).toHaveLength(3);
+    ).toHaveLength(migrations.length);
     expect(sql).toContain("RELEASE_BACKUP_EXPIRED");
     expect(sql).toContain("RELEASE_PROJECT_INVENTORY_CHANGED");
     expect(() => migrationTransaction(f.sources)).toThrow("backup context");
     expect(() => migrationTransaction([])).toThrow("Missing migration");
   });
+});
+
+it("refuses a legacy archive that would silently omit review history in the collaboration release", async () => {
+  const f = await fixture(collaboration, 2);
+  const project = f.report.projects[0];
+  const { bundle } = await decodeBackup(
+    new Uint8Array(await readFile(`${f.directory}/${project.id}.zip`)),
+  );
+  delete bundle.tables.case_reviews;
+  const bytes = await encodeBackup(
+    { ...bundle, version: 1 },
+    { "files/capture": new Uint8Array([1, 2, 3]) },
+  );
+  await writeFile(`${f.directory}/${project.id}.zip`, bytes);
+  project.sha256 = digest(bytes);
+  await f.save();
+  await expect(
+    collaboration.verifyReleaseBackup(f.directory, f.live, f.sources, now),
+  ).rejects.toThrow("archive format");
 });

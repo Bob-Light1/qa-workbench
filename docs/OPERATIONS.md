@@ -138,7 +138,7 @@ The baseline-specific versioned preparation tool replaces the earlier private sc
 `backups/`. Both commands below use read-only PostgreSQL sessions and download
 Storage objects; neither applies SQL, generates recovery links nor publishes assets.
 They intentionally reject the current seven-migration hosted installation. Use
-ordinary UI/CLI backups for that installation. The historical baseline commands are:
+the P2-02 procedure below for its next release, or ordinary UI/CLI backups. The historical baseline commands are:
 
 ```sh
 node --env-file=.env.hosted.local scripts/p2-release.mjs prepare
@@ -171,6 +171,38 @@ A generated plan is not release approval.
 Archives, reports, dumps and SQL plans remain ignored with directory/file modes
 700/600. Checksums detect corruption, not malicious replacement. Keep the required
 separate private copy; preparing local files alone does not satisfy that requirement.
+
+## P2-02 release preparation
+
+The next additive release starts at the exact seven-version hosted ledger and
+applies only `202610300001_bulk_assignments.sql`. Do not reuse the four-to-seven
+P2-01 entry point. Prepare and inspect the new release with Node 24:
+
+```sh
+node --env-file=.env.hosted.local scripts/collaboration-release.mjs prepare
+node --env-file=.env.hosted.local scripts/collaboration-release.mjs plan backups/pre-collaboration-release-TIMESTAMP
+```
+
+These commands share the read-only backup/planning implementation with P2-01,
+but fix a distinct baseline, directory and single migration. They preserve all
+case reviews in format-2 archives and reject legacy format-1 release archives.
+Every current project and ready evidence file is included and decoded, alongside
+the separately captured PostgreSQL dump. The same one-hour expiry, target,
+inventory, source-hash, checksum, private-file and SQL locking safeguards apply.
+They neither apply the migration nor publish assets. A plan is not approval;
+the P2-01 production approval did not include this new migration.
+
+After explicit approval for migration `202610300001` and Pages publication,
+refresh the backup and plan, inspect `apply.sql`, then apply it as described
+above. Recheck the eight-version hosted ledger and compare every original
+project's exported historical rows with its pre-migration archive. Retain the
+compatible P2-01 frontend until the hosted collaboration and existing permission
+checks pass. Run the opted-in hosted twenty-account API acceptance documented in
+CONTRIBUTING.md, build/scan and publish the validated source to the existing Pages
+project, then run its three-session bulk HTTPS journey plus existing regression
+journeys. Record the source commit, deployment URL, actual checks and fresh
+archives before claiming P2-02 delivery. This procedure has not itself applied a
+hosted migration or published a new frontend.
 
 ## Free-host constraints and recovery
 

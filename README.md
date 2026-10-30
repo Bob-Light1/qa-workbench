@@ -15,6 +15,8 @@ has been exercised against an empty local installation. Published frontend sourc
 `c305e01`; production deployment: `218a2d56`; hosted migrations: 1–7.
 A P2-02 bulk-assignment increment is implemented and verified locally; its new
 migration and frontend have not been published.
+Its seven-to-eight migration backup/planning tool and opted-in hosted acceptance
+are ready; see [the release procedure](docs/OPERATIONS.md#p2-02-release-preparation).
 The authoritative work status is [the roadmap](docs/ROADMAP.md); the latest executed
 checks and next action are in [the handoff](docs/current_task.md).
 

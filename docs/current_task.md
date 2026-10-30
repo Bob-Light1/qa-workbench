@@ -6,6 +6,8 @@ Frontend c305e01, deployment 218a2d56, hosted migrations 1–7. All five HTTPS b
 journeys pass across two dedicated fixture runs. Broader ERP coverage remains open.
 P2-02 bulk assignment and twenty-account API collaboration VERIFIED LOCALLY at
 25bf7f3; NOT RELEASED. Phase 3 not started.
+P2-02 release preparation tooling and hosted acceptance opt-in are now locally
+verified; fresh hosted backup/plan preparation is the current next action.
 
 ## Objective and released state
 
@@ -557,3 +559,61 @@ production approval covered only migrations 202610250001–003, already delivere
 Production remains source c305e01, deployment 218a2d56 at
 https://qa-workbench.pages.dev (direct deployment:
 https://218a2d56.qa-workbench.pages.dev), with hosted migrations 1–7.
+
+## P2-02 release preparation milestone — 2026-10-30
+
+Objective: continue in roadmap order and commit validated work. Initial main was
+clean at d7b821c. No subagents used. Scope: make the seven-to-eight production
+release concrete and reviewable; do not reuse the delivered four-to-seven plan.
+
+Changes:
+
+- Extracted the existing read-only backup/plan engine into `release-tool.mjs`;
+  the historical P2-01 entry point retains its fixed baseline. New
+  `collaboration-release.mjs` fixes migrations 1–7, only pending `202610300001`,
+  separate private directories and format-2 archives preserving case reviews.
+  One-hour expiry, complete inventory, source/snapshot/archive checksums and
+  transaction-time locked baseline/age/inventory checks remain enforced.
+- Added a local-only rollback rehearsal for the new plan and CI configuration.
+  It reconstructs the seven-version baseline only inside a transaction which
+  always rolls back. Fingerprints now also cover campaign snapshots and results.
+- Added `--hosted` to additive collaboration acceptance with exact-target/strict
+  argument checks before provisioning, and separate hosted private fixtures/report.
+  This prepares the future acceptance command; it has not been run on hosted data.
+- Updated operations/contributor guidance. No frontend, migration source, ERP case
+  content, product phase ordering or CH-* rule changed; no manual ERP case revision
+  is required for release tooling.
+
+Checks actually completed:
+
+- 36 unit checks PASS, including both release baselines, complete inventories,
+  modified sources/snapshots/archives, expiry/future dates and actual CLI refusal
+  before account provisioning. Removing only the archive-version guard in temporary
+  mutant files caused the new missing-review-history regression to fail as
+  expected; all temporary mutant files were removed.
+- TypeScript/production build PASS; npm audit reports zero vulnerabilities.
+  Frontend hosted configuration, changed-file formatting and Git diff checks pass.
+  Vite retains the advisory 512 kB JS chunk warning (151 kB gzip).
+- Both old/new SQL plans pass five checks each on the owned local database:
+  replay, expired/future backup and changed-inventory denial, plus successful
+  migration/ledger rehearsal and access checks. Every transaction rolls back;
+  review rows, snapshots, executions, function definitions and full ledger retain
+  their fingerprints. No database reset/restart or persistent schema edit occurred.
+- Reran all 47 collaboration API checks on fresh local synthetic projects and
+  twenty member identities plus an outsider. The three-session local browser
+  journey passes with actual stale/persisted bulk writes, failed-request handling,
+  tester restrictions and selection reset. Desktop/mobile captures were visually
+  inspected; no document overflow. Private captures:
+  `backups/p2-02-release-prep-desktop.png` and `-mobile.png`.
+- No hosted write/publication, destructive integration/restore, invitation or
+  coverage/review-specific rerun, or remote CI run is claimed. Those earlier checks
+  remain historical. Existing local data and retained-volume/tmpfs caveats apply.
+
+Next action: commit this verified tooling, then use it to prepare and inspect a
+fresh private hosted backup/plan through read-only connections. Obtain explicit
+approval for the new migration and Pages publication as required by the preceding
+handoff, refresh expiring artifacts if necessary, then execute hosted API/HTTPS
+acceptance. The separate private off-machine backup copy remains outstanding.
+Production stays source c305e01, deployment 218a2d56 at
+https://qa-workbench.pages.dev, with hosted migrations 1–7. Broader ERP coverage,
+P2-02 online delivery and phase 3 remain open.

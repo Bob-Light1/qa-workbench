@@ -27,5 +27,6 @@ jobs:
       - run: npm run test:collaboration:api
       - run: QA_BROWSER_ACCOUNTS=.env.collaboration.browser npx playwright test tests/browser/collaboration.spec.ts
       - run: npm run test:release:db
+      - run: npm run test:release:collaboration:db
       - if: always()
         run: npx supabase stop

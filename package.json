@@ -22,7 +22,8 @@
     "deploy": "npm run build && wrangler pages deploy dist --project-name qa-workbench",
     "test:reviews:api": "node --env-file=.env.local scripts/review-check.mjs",
     "test:collaboration:api": "node --env-file=.env.local scripts/collaboration-check.mjs",
-    "test:release:db": "node scripts/check-p2-release.mjs"
+    "test:release:db": "node scripts/check-p2-release.mjs",
+    "test:release:collaboration:db": "node scripts/check-p2-release.mjs --collaboration"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.0.0",
