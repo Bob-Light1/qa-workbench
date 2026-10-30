@@ -4,7 +4,8 @@ Last updated: 2026-10-30.
 Status: PHASE 1 DELIVERED. P2-01 coverage/review increment RELEASED AND VERIFIED.
 Frontend c305e01, deployment 218a2d56, hosted migrations 1–7. All five HTTPS browser
 journeys pass across two dedicated fixture runs. Broader ERP coverage remains open.
-Phase 3 not started.
+P2-02 bulk assignment and twenty-account API collaboration VERIFIED LOCALLY at
+25bf7f3; NOT RELEASED. Phase 3 not started.
 
 ## Objective and released state
 
@@ -465,3 +466,94 @@ coverage remains open under P2-01. Keep the real ten-case workspace distinct fro
 synthetic acceptance data. Portable backups are verified local/private copies;
 their separate off-machine copy remains outstanding. Retained-volume/tmpfs and
 local Edge Function caveats above remain applicable. Phase 3 has not started.
+
+## P2-02 collaboration closeout — 2026-10-30
+
+Objective: continue the next engineering increment, validate it and commit the
+completed work. Initial main was clean at 8979a90. Implementation commit: 25bf7f3.
+No subagents used. Scope is atomic campaign-item assignment/unassignment and
+actual twenty-account concurrent API work. Broader ERP coverage and phase 3 remain
+open. This increment is locally complete; P2-02 delivery remains IN PROGRESS.
+
+Changes and preservation:
+
+- Added append-only migration `202610300001_bulk_assignments.sql` and the French
+  bulk-selection interface. The RPC checks current roles, active target membership,
+  one campaign, 1–200 distinct IDs and every expected version. Stable item lock
+  order serializes overlapping batches and single assignments. A shared project
+  lock serializes membership changes. Any invalid/stale item refuses the whole lot.
+- Refresh/campaign navigation clears selection and target; failed requests retain
+  the selection without displaying success. Explicit label association keeps the
+  target select reliably addressable. Testers see no bulk controls. Closed
+  campaigns may be organized without reopening them or allowing execution.
+- The additive migration was applied only to the owned local validation stack.
+  No existing migration was edited, no data reset occurred and no hosted state
+  changed. No table or backup-format change was needed. Case snapshots and all
+  submitted results remain unchanged by assignments. This Workbench feature needs
+  no ERP case revision, phase-order change or CH-* acceptance change.
+- Added local-only additive collaboration acceptance, a dedicated browser journey
+  and CI steps. Updated the old release SQL rehearsal to verify the entire tracked
+  local ledger and temporarily reconstruct its original ledger/review-table baseline
+  only inside rolled-back transactions. It fingerprints the new function too.
+
+Checks actually completed:
+
+- Final 29 unit checks, TypeScript/production build, changed-file formatting and
+  Git diff checks pass. Vite retains its advisory chunk warning (512 kB JS,
+  151 kB gzip); the build succeeds.
+- Final collaboration API acceptance: 47 checks pass through actual Auth and user
+  JWTs. Includes anonymous/tester/outsider/direct-write denial, malformed and
+  mixed-project/campaign selections, inactive targets/withdrawn editors, stale
+  all-or-nothing refusal, single/bulk races, twenty overlapping batches with one
+  winner/nineteen conflicts, twenty distinct concurrent drafts/failures/retests,
+  immutable results, forty retained submitted outcomes in export and preserved
+  snapshots. Twenty competing case edits use the two authorized editor identities;
+  execution and history-read checks use all twenty identities. This is functional
+  concurrency acceptance, not a capacity benchmark or twenty browser sessions.
+- Final dedicated browser journey passes on freshly recreated collaboration
+  fixtures using three isolated sessions. Actual stale writes and persisted bulk
+  assignment/unassignment, injected HTTP failure without false success, refreshed
+  selection, campaign switching, tester restrictions and mobile overflow are checked.
+  Final desktop/mobile captures were visually inspected and retained privately as
+  `backups/p2-02-local-collaboration-*.png`.
+- Existing coverage API: all 13 checks pass on fresh separate local fixtures,
+  including confirmed private evidence. Three existing browser journeys then pass
+  sequentially: coverage, complete decoded ZIP export with evidence and two-account
+  failure/evidence/correction/passing retest. This reruns campaign/execution behavior
+  affected by the table integration. Captures are retained privately as
+  `backups/p2-02-regression-*.png`. Together with the new journey, four browser
+  journeys pass across two sequential fixture runs.
+- All four old-release SQL rehearsal checks pass with local migrations 1–8:
+  replay denial, stale-backup denial, changed-inventory denial and successful
+  migration/ledger application inside a rollback. Review rows, relevant function
+  definitions and the full migration ledger retain their fingerprints afterwards.
+- The first browser attempt selected the owner's second synthetic project and
+  failed before product assertions; the test now selects its intended project.
+  The next attempt detected an unreliable implicit select-label association; the
+  explicit label fix passes the same check. Final fresh-fixture runs pass.
+- The first complementary coverage API attempt failed with Storage HTTP 504. The
+  owned Storage container was unhealthy with timed-out probes. Restarted only
+  `supabase_storage_qa-workbench-validation`, preserving its volumes and all data;
+  health recovered and the fresh coverage/API/evidence/browser runs above passed.
+  No database or ERP/shared service was restarted. Its failed synthetic fixture
+  remains isolated, with any pending capture intact for inspection.
+- Full destructive phase-1 Auth/Storage restoration, invitation activation,
+  review-specific API/browser acceptance, npm audit and remote CI were not rerun.
+  Their earlier release results remain historical. No hosted acceptance or new
+  frontend deployment is claimed. No dependency change was made.
+
+Private `.env.collaboration.browser`, `backups/collaboration-acceptance.json` and
+screenshots remain ignored. No credentials, real ERP personal data or invitation
+links were added to tracked files. Portable backups still need their separate
+private off-machine copy. Retained-volume/tmpfs and local Edge Function caveats
+above remain applicable; the owned database was preserved throughout.
+
+Next action: prepare a fresh private backup and reviewed seven-to-eight migration
+plan for `202610300001`, obtain explicit approval for that new production migration
+and Pages publication, then validate hosted twenty-account/bulk and HTTPS behavior.
+The old `scripts/p2-release.mjs` plan is specifically for the already delivered
+four-to-seven release and must not be reused for this new migration. The previous
+production approval covered only migrations 202610250001–003, already delivered.
+Production remains source c305e01, deployment 218a2d56 at
+https://qa-workbench.pages.dev (direct deployment:
+https://218a2d56.qa-workbench.pages.dev), with hosted migrations 1–7.

@@ -13,7 +13,7 @@ Dates and executed evidence live in [current handoff](current_task.md).
 | P1-06 | Ten ERP cases and references in four ERP repos | DONE        | Actual routes verified; no fixture credentials published      |
 | P1-07 | Hosted release and handoff                     | DONE        | Real HTTPS and two-account acceptance; record commit          |
 | P2-01 | Extend ERP case coverage and reviews           | IN PROGRESS | Case IDs linked to product work and review state              |
-| P2-02 | Twenty-user collaboration and bulk work        | NOT STARTED | Concurrent work verified with twenty accounts                 |
+| P2-02 | Twenty-user collaboration and bulk work        | IN PROGRESS | Concurrent work verified with twenty accounts                 |
 | P3-01 | Automated result ingestion and impact checks   | NOT STARTED | Provenance and history preserved                              |
 | P3-02 | Scheduled backups and useful reporting         | NOT STARTED | Recovery exercised and indicators actionable                  |
 
@@ -41,6 +41,19 @@ workspace. No ERP source, roadmap ordering, CH-* criteria or manual case content
 changed during this Workbench release.
 
 P2-01 remains IN PROGRESS for broader ERP coverage; its coverage/review delivery
-milestone is complete. P2-02 twenty-account collaboration/bulk work is the next
-engineering increment after this milestone. Phase 3 has not started. Workbench
+milestone is complete. P2-02 twenty-account collaboration/bulk work has a locally verified increment
+awaiting hosted delivery. Phase 3 has not started. Workbench
 acceptance does not establish ERP CH-0, CH-2, CH-4 or other business acceptance.
+
+P2-02 local increment (2026-10-30): atomic bulk assignment/unassignment for up to
+200 campaign items is implemented with per-item version checks and current role
+validation. Additive migration `202610300001` is installed only on the owned local
+stack. Implementation commit `25bf7f3` passes 47 actual Auth/API checks, including
+concurrent drafts/results across twenty identities, twenty overlapping batches,
+whole-batch stale refusal and preserved history. A three-session bulk browser
+journey passes with desktop/mobile inspection; 13 existing coverage API checks
+and three existing coverage/export/workflow browser journeys also pass. Unit,
+build and rollback-only release SQL checks pass. CI is configured, without a
+claimed remote run. Production remains the verified P2-01 release above; hosted
+migration/publication and acceptance are the next delivery step. No ERP source,
+case content or CH-* acceptance changes are required for this coordination feature.
