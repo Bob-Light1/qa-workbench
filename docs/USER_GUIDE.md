@@ -128,3 +128,20 @@ Une revue porte sur la qualité de la fiche. Elle ne constitue pas un résultat 
 test ni une validation de l’ERP ; elle n’empêche pas la création d’une campagne.
 Les exports incluent l’historique des revues. Les anciennes archives restent
 restaurables, sans revue si elles précèdent cette fonctionnalité.
+
+## Préparer les affectations en lot (prochaine version)
+
+Cette fonction est vérifiée localement et n’est pas encore disponible sur le site
+en ligne. Dans **Campagnes**, un administrateur ou rédacteur peut sélectionner
+plusieurs scénarios, choisir **Affecter la sélection à**, puis cliquer sur
+**Appliquer l’affectation**. **Tout sélectionner** concerne uniquement la campagne
+affichée ; **Non affectée** retire les affectations. Un lot contient au maximum
+200 scénarios et peut remplacer les affectations existantes.
+
+Si un scénario a été modifié ailleurs ou si le membre choisi n’est plus actif,
+tout le lot est refusé. Après un conflit, cliquer sur **Actualiser**, vérifier les
+affectations puis refaire la sélection. Une actualisation ou un changement de
+campagne efface la sélection. En cas d’erreur réseau, vérifier l’état enregistré
+avant de répéter l’action. Les anciens résultats et les consignes figées restent
+consultables après une réaffectation. Un brouillon ne peut plus être soumis par
+son auteur si le scénario a été affecté à quelqu’un d’autre.

@@ -10,6 +10,7 @@ import {
 } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { CaseCoverage } from "./CaseCoverage";
+import { BulkAssignment } from "./BulkAssignment";
 import {
   LayoutDashboard,
   ListChecks,
@@ -1070,127 +1071,171 @@ export function App() {
                             </select>
                           )}
                         </div>
-                        <div className="panel table-wrap">
-                          <table>
-                            <thead>
-                              <tr>
-                                <th>Scénario figé</th>
-                                <th>Affectation</th>
-                                <th>Dernier résultat</th>
-                                <th>Action</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {data.items
-                                .filter((i) => i.campaign_id === c.id)
-                                .map((i) => (
-                                  <tr key={i.id}>
-                                    <td>
-                                      <small className="code">
-                                        {i.snapshot.code} · v{i.case_version}
-                                      </small>
-                                      <strong>{i.snapshot.title}</strong>
-                                      <small>{i.snapshot.minutes} min</small>
-                                    </td>
-                                    <td>
-                                      {editor ? (
-                                        <select
-                                          aria-label={`Affectation ${i.snapshot.code}`}
-                                          value={i.assignee_id || ""}
-                                          disabled={busy}
-                                          onChange={(e) =>
-                                            run(async () => {
-                                              await rpc("assign_item", {
-                                                p_id: i.id,
-                                                p_user: e.target.value || null,
-                                                p_version: i.version,
-                                              });
-                                              await reload();
-                                            })
-                                          }
-                                        >
-                                          <option value="">Non affectée</option>
-                                          {data.members
-                                            .filter((m) => m.active)
-                                            .map((m) => (
-                                              <option
-                                                key={m.user_id}
-                                                value={m.user_id}
-                                              >
-                                                {m.email}
-                                              </option>
-                                            ))}
-                                        </select>
-                                      ) : (
-                                        memberName(i.assignee_id)
-                                      )}
-                                    </td>
-                                    <td>
-                                      <ResultTag
-                                        verdict={latest(i.id)?.verdict}
-                                      />
-                                      <small>
-                                        {
-                                          data.executions.filter(
-                                            (e) =>
-                                              e.item_id === i.id && e.verdict,
-                                          ).length
-                                        }{" "}
-                                        résultat(s)
-                                      </small>
-                                    </td>
-                                    <td>
-                                      <button
-                                        className="secondary"
-                                        disabled={
-                                          busy ||
-                                          c.status !== "active" ||
-                                          Boolean(
-                                            i.assignee_id &&
-                                            i.assignee_id !== user,
-                                          )
-                                        }
-                                        onClick={() => execute(i)}
-                                      >
-                                        <Play size={14} />
-                                        {latest(i.id)
-                                          ? "Revérifier"
-                                          : "Commencer"}
-                                      </button>
-                                      <details>
-                                        <summary>Historique</summary>
-                                        {data.executions
-                                          .filter(
-                                            (e) =>
-                                              e.item_id === i.id && e.verdict,
-                                          )
-                                          .map((e) => (
-                                            <div
-                                              key={e.id}
-                                              className="history-entry"
-                                            >
-                                              <ResultTag verdict={e.verdict} />
-                                              <small>
-                                                {memberName(e.author_id)} ·{" "}
-                                                {new Date(
-                                                  e.submitted_at!,
-                                                ).toLocaleString("fr-FR")}
-                                              </small>
-                                              <p>{e.notes}</p>
-                                              <button
-                                                onClick={() => setActive(e)}
-                                              >
-                                                Détails
-                                              </button>
-                                            </div>
-                                          ))}
-                                      </details>
-                                    </td>
+                        <BulkAssignment
+                          key={c.id}
+                          campaign={c.id}
+                          items={data.items}
+                          members={data.members}
+                          enabled={editor}
+                          busy={busy || loading}
+                          assign={(items, assignee) =>
+                            run(async () => {
+                              const count = await rpc<number>("assign_items", {
+                                p_campaign: c.id,
+                                p_items: items,
+                                p_user: assignee,
+                              });
+                              await reload();
+                              setNotice(`${count} scénario(s) affecté(s).`);
+                            })
+                          }
+                        >
+                          {({ selected, toggle }) => (
+                            <div className="panel table-wrap">
+                              <table>
+                                <thead>
+                                  <tr>
+                                    <th>Scénario figé</th>
+                                    <th>Affectation</th>
+                                    <th>Dernier résultat</th>
+                                    <th>Action</th>
                                   </tr>
-                                ))}
-                            </tbody>
-                          </table>
-                        </div>
+                                </thead>
+                                <tbody>
+                                  {data.items
+                                    .filter((i) => i.campaign_id === c.id)
+                                    .map((i) => (
+                                      <tr key={i.id}>
+                                        <td>
+                                          {editor && (
+                                            <label className="bulk-item-selection">
+                                              <input
+                                                type="checkbox"
+                                                aria-label={`Sélectionner ${i.snapshot.code}`}
+                                                checked={selected.has(i.id)}
+                                                disabled={busy}
+                                                onChange={() => toggle(i)}
+                                              />
+                                              Sélectionner
+                                            </label>
+                                          )}
+                                          <small className="code">
+                                            {i.snapshot.code} · v
+                                            {i.case_version}
+                                          </small>
+                                          <strong>{i.snapshot.title}</strong>
+                                          <small>
+                                            {i.snapshot.minutes} min
+                                          </small>
+                                        </td>
+                                        <td>
+                                          {editor ? (
+                                            <select
+                                              aria-label={`Affectation ${i.snapshot.code}`}
+                                              value={i.assignee_id || ""}
+                                              disabled={busy}
+                                              onChange={(e) =>
+                                                run(async () => {
+                                                  await rpc("assign_item", {
+                                                    p_id: i.id,
+                                                    p_user:
+                                                      e.target.value || null,
+                                                    p_version: i.version,
+                                                  });
+                                                  await reload();
+                                                })
+                                              }
+                                            >
+                                              <option value="">
+                                                Non affectée
+                                              </option>
+                                              {data.members
+                                                .filter((m) => m.active)
+                                                .map((m) => (
+                                                  <option
+                                                    key={m.user_id}
+                                                    value={m.user_id}
+                                                  >
+                                                    {m.email}
+                                                  </option>
+                                                ))}
+                                            </select>
+                                          ) : (
+                                            memberName(i.assignee_id)
+                                          )}
+                                        </td>
+                                        <td>
+                                          <ResultTag
+                                            verdict={latest(i.id)?.verdict}
+                                          />
+                                          <small>
+                                            {
+                                              data.executions.filter(
+                                                (e) =>
+                                                  e.item_id === i.id &&
+                                                  e.verdict,
+                                              ).length
+                                            }{" "}
+                                            résultat(s)
+                                          </small>
+                                        </td>
+                                        <td>
+                                          <button
+                                            className="secondary"
+                                            disabled={
+                                              busy ||
+                                              c.status !== "active" ||
+                                              Boolean(
+                                                i.assignee_id &&
+                                                i.assignee_id !== user,
+                                              )
+                                            }
+                                            onClick={() => execute(i)}
+                                          >
+                                            <Play size={14} />
+                                            {latest(i.id)
+                                              ? "Revérifier"
+                                              : "Commencer"}
+                                          </button>
+                                          <details>
+                                            <summary>Historique</summary>
+                                            {data.executions
+                                              .filter(
+                                                (e) =>
+                                                  e.item_id === i.id &&
+                                                  e.verdict,
+                                              )
+                                              .map((e) => (
+                                                <div
+                                                  key={e.id}
+                                                  className="history-entry"
+                                                >
+                                                  <ResultTag
+                                                    verdict={e.verdict}
+                                                  />
+                                                  <small>
+                                                    {memberName(e.author_id)} ·{" "}
+                                                    {new Date(
+                                                      e.submitted_at!,
+                                                    ).toLocaleString("fr-FR")}
+                                                  </small>
+                                                  <p>{e.notes}</p>
+                                                  <button
+                                                    onClick={() => setActive(e)}
+                                                  >
+                                                    Détails
+                                                  </button>
+                                                </div>
+                                              ))}
+                                          </details>
+                                        </td>
+                                      </tr>
+                                    ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          )}
+                        </BulkAssignment>
                       </div>
                     ))}
                   {!campaignId && (

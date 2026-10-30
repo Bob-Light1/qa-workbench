@@ -82,8 +82,9 @@ may be used for a temporary session. CLI reads return JSON; failures exit nonzer
 
 RPCs: create_project, save_case, archive_case, start_campaign, assign_item,
 set_campaign_status, begin_execution, save_execution, report_issue, update_issue,
-reserve_attachment, finish_attachment, change_member, review_case, export_bundle. Each has typed
-SQL arguments in the migrations and is exercised through scripts/integration.mjs.
+reserve_attachment, finish_attachment, change_member, review_case, assign_items, export_bundle. Each has typed
+SQL arguments in the migrations and is exercised through scripts/integration.mjs
+or the focused scripts/*-check.mjs acceptance commands.
 Writes returning VERSION_CONFLICT must be refreshed and reviewed, never blindly retried.
 The access Edge Function accepts POST with action=invite/recovery, project_id and
 email (plus role for invitations), returning an individual link when needed.
@@ -132,8 +133,35 @@ Release preparation is tracked in `scripts/p2-release.mjs`; see OPERATIONS.md.
 Unit checks exercise stale backups, the complete live project inventory, migration
 source changes and archive/snapshot corruption. `npm run test:release:db` checks
 the generated SQL against only the owned local validation container. It refuses
-replay against the seven-migration ledger, expired backups and changed project
-inventories, then recreates the four-migration
+replay against the complete tracked migration ledger, expired backups and changed project
+inventories, then recreates the four-version ledger/review-table
 baseline inside a rolled-back transaction, executes the three pending migrations
 and ledger writes, and verifies RLS/grants and unchanged review/function/ledger
 fingerprints afterwards. It never commits or contacts hosted services.
+
+## Twenty-account collaboration acceptance
+
+`npm run test:collaboration:api` adds a dedicated synthetic project, twenty member
+identities and one outsider to the owned local stack. It has no hosted mode and
+never resets data. Service credentials only provision fixtures; all business
+operations and allow/deny assertions use real user JWTs. It verifies malformed
+and mixed-project/campaign selections, role/target withdrawal, whole-batch rollback,
+twenty overlapping bulk writes, single/bulk collisions, twenty independent concurrent
+drafts/failures/retests and retained snapshots/export history. Twenty competing
+case edits use the two authorized editor identities; the execution journeys use
+all twenty identities. This is functional concurrency acceptance, not a capacity
+benchmark or twenty simultaneous browser sessions.
+
+```sh
+npm run test:collaboration:api
+QA_BROWSER_ACCOUNTS=.env.collaboration.browser npx playwright test tests/browser/collaboration.spec.ts
+```
+
+Run these sequentially and regenerate fixtures before repeating the browser test.
+The browser uses three isolated sessions (admin/editor/tester), checks real stale
+writes and successful persistence, injects a failed request to check the failure
+UI, and checks selection reset, reader permissions and desktop/mobile layout.
+Private `.env.collaboration.browser` and `backups/collaboration-acceptance.json`
+remain ignored. CI includes these commands; no remote CI run is implied. Apply
+migration `202610300001_bulk_assignments.sql` locally before the new acceptance.
+The online P2-01 release does not yet contain this migration or interface.

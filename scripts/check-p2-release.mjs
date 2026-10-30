@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { readFile } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
 import { baseline, migrations, migrationTransaction } from "./p2-release.mjs";
 
 // This command has no hosted option. Its only database is the owned local container.
@@ -39,19 +39,25 @@ function rows(input) {
   return result.stdout.trim();
 }
 const versions = [...baseline, ...migrations.map((m) => m.split("_")[0])];
+// Later additive increments may be installed locally. Verify the entire tracked
+// ledger, then remove their entries only inside the rolled-back old-release rehearsal.
+const installedVersions = (await readdir("supabase/migrations"))
+  .filter((name) => name.endsWith(".sql"))
+  .map((name) => name.split("_")[0])
+  .sort();
 assert.deepEqual(
   JSON.parse(
     rows(
       "select json_agg(version order by version) from supabase_migrations.schema_migrations;",
     ),
   ),
-  versions,
+  installedVersions,
 );
 const fingerprint = `select json_build_array(
   (select md5(coalesce(jsonb_agg(to_jsonb(r) order by id)::text,'[]')) from public.case_reviews r),
   (select md5(jsonb_agg(to_jsonb(m) order by version)::text) from supabase_migrations.schema_migrations m),
   (select md5(string_agg(pg_get_functiondef(p.oid),'' order by p.oid)) from pg_proc p
-    where p.pronamespace='public'::regnamespace and p.proname in ('review_case','export_bundle','restore_bundle')));`;
+    where p.pronamespace='public'::regnamespace and p.proname in ('review_case','export_bundle','restore_bundle','assign_items')));`;
 const before = rows(fingerprint);
 const sources = await Promise.all(
   migrations.map((m) => readFile(`supabase/migrations/${m}.sql`, "utf8")),
@@ -71,7 +77,7 @@ console.log(
   "PASS migration replay is refused before schema changes; state preserved.",
 );
 
-// Recreate the four-migration baseline only INSIDE a transaction that rolls back.
+// Recreate the four-version ledger/review-table baseline only INSIDE a transaction that rolls back.
 // Never send the generated COMMIT to the local acceptance database.
 function atBaseline(transaction) {
   assert.ok(transaction.endsWith("commit;\n"));
@@ -79,7 +85,7 @@ function atBaseline(transaction) {
     "begin;\n",
     `begin;
 drop table public.case_reviews cascade;
-delete from supabase_migrations.schema_migrations where version in ('202610250001','202610250002','202610250003');
+delete from supabase_migrations.schema_migrations where version not in (${baseline.map((v) => `'${v}'`).join(",")});
 `,
   );
 }

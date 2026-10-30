@@ -35,6 +35,15 @@ without generating a takeover link.
   Author self-review is permitted; no independent-approver workflow is claimed.
 - Campaigns record the environment and per-brick build references. Their items
   store immutable case snapshots at campaign creation, not at first execution.
+- Bulk assignment is one atomic RPC for 1–200 distinct items in one campaign,
+  to one active project member or to nobody. Only current admins/editors can write;
+  every item must match the selected version. It locks items in UUID order and
+  shares the project lock with membership changes, checking caller and target after
+  acquiring it. Concurrent single or bulk assignments cannot silently overwrite
+  each other. Any invalid/stale item refuses the entire batch. Like individual
+  assignment, it can organize closed campaigns without reopening them. It changes
+  no case snapshots, executions, results or archive format. The UI clears selection
+  on refresh or campaign/project navigation and preserves it after failed requests.
 - Assignments are versioned. An unassigned item is open to project members; an
   assigned item can only be executed by its assignee.
 - Executions have UUID request identity, actor, notes, duration and version.

@@ -24,6 +24,8 @@ jobs:
       - run: QA_BROWSER_ACCOUNTS=.env.coverage.browser npx playwright test tests/browser/coverage.spec.ts
       - run: npm run test:reviews:api
       - run: QA_BROWSER_ACCOUNTS=.env.review.browser npx playwright test tests/browser/reviews.spec.ts
+      - run: npm run test:collaboration:api
+      - run: QA_BROWSER_ACCOUNTS=.env.collaboration.browser npx playwright test tests/browser/collaboration.spec.ts
       - run: npm run test:release:db
       - if: always()
         run: npx supabase stop

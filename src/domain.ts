@@ -172,6 +172,9 @@ export function friendlyError(error: unknown): string {
   const messages: Record<string, string> = {
     VERSION_CONFLICT:
       "Cette donnée a été modifiée ailleurs. Rechargez avant de réessayer.",
+    INVALID_SELECTION:
+      "La sélection doit contenir de 1 à 200 scénarios distincts et disponibles. Actualisez avant de réessayer.",
+    INVALID_MEMBER: "Choisissez un membre actif de ce projet, puis réessayez.",
     CASE_ARCHIVED: "Restaurez la fiche avant de la relire.",
     REVIEW_NOTES_REQUIRED: "Décrivez les corrections demandées.",
     INVALID_REVIEW:
