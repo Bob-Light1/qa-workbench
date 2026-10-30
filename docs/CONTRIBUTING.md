@@ -127,3 +127,13 @@ is accepted. `.env.coverage.hosted.browser`, `.env.review.hosted.browser` and
 `backups/review.hosted-acceptance.zip` stay private/ignored. Run hosted checks only
 after a fresh verified backup and compatible migrations. Never run
 `test:integration` or reset/restore operations against hosted data.
+
+Release preparation is tracked in `scripts/p2-release.mjs`; see OPERATIONS.md.
+Unit checks exercise stale backups, the complete live project inventory, migration
+source changes and archive/snapshot corruption. `npm run test:release:db` checks
+the generated SQL against only the owned local validation container. It refuses
+replay against the seven-migration ledger, expired backups and changed project
+inventories, then recreates the four-migration
+baseline inside a rolled-back transaction, executes the three pending migrations
+and ledger writes, and verifies RLS/grants and unchanged review/function/ledger
+fingerprints afterwards. It never commits or contacts hosted services.

@@ -132,6 +132,42 @@ Record the new source commit and deployment identifier only after these checks.
 If a check fails, retain its real error and inspect state before retrying. Use an
 additive repair migration or the prior compatible frontend as appropriate.
 
+The versioned preparation tool replaces the earlier private scripts under
+`backups/`. Both commands below use read-only PostgreSQL sessions and download
+Storage objects; neither applies SQL, generates recovery links nor publishes assets:
+
+```sh
+node --env-file=.env.hosted.local scripts/p2-release.mjs prepare
+node --env-file=.env.hosted.local scripts/p2-release.mjs plan backups/pre-p2-release-TIMESTAMP
+```
+
+Use Node 24. `prepare` prints the actual directory to pass to `plan`. It requires
+the exact existing QA API target, its private database password, `psql`, and the
+running owned validation container's PostgreSQL 17 `pg_dump` (the host's version
+14 cannot dump this server). The dump covers public/private application schemas
+and the migration ledger; portable project archives include all ready evidence.
+Each project archive is a consistent RPC snapshot. The SQL dump and different
+project archives are separate snapshots, not one installation-wide instant.
+These files do not include Auth password hashes or sessions.
+
+`release.json` records the source commit, migration hashes, target, start time,
+project IDs and SHA-256 hashes. `plan` requires a backup started within the last
+hour, the exact current project inventory and unchanged four-migration baseline
+and source files. It decodes every archive to verify its manifest/evidence and
+checks the SQL dump hash. It writes a private `apply.sql` containing the three
+migrations and ledger entries in one transaction, with bounded locks and a
+baseline recheck under a migration-ledger lock. Inspect this file before the
+authorized application through `psql -X -w -v ON_ERROR_STOP=1`; supply connection
+credentials only through the private environment. The preparation environment
+forces read-only sessions and is deliberately unsuitable for applying SQL.
+The generated SQL rechecks backup age and project inventory under the same locks
+before any schema change. Regenerate the plan if time or source/state has changed.
+A generated plan is not release approval.
+
+Archives, reports, dumps and SQL plans remain ignored with directory/file modes
+700/600. Checksums detect corruption, not malicious replacement. Keep the required
+separate private copy; preparing local files alone does not satisfy that requirement.
+
 ## Free-host constraints and recovery
 
 At the 2026-10-22 review, Supabase Free lists a 500 MB database, 1 GB file storage,
